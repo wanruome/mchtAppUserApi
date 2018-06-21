@@ -73,7 +73,7 @@ public class MsgFunctionConfig {
 	public static String generateVerifyToken() {
 		StringBuilder sb = new StringBuilder();
 		Random random = new Random();
-		for (int i = 0; i < AppConfig.VerfiyCodeLength; i++) {
+		for (int i = 0; i < AppConfig.VerfiyCodeLength(); i++) {
 			sb.append(random.nextInt(10));
 		}
 		return sb.toString();
@@ -82,7 +82,7 @@ public class MsgFunctionConfig {
 	public static String generateVerifyCode() {
 		StringBuilder sb = new StringBuilder();
 		Random random = new Random();
-		for (int i = 0; i < AppConfig.VerfiyCodeLength; i++) {
+		for (int i = 0; i < AppConfig.VerfiyCodeLength(); i++) {
 			sb.append(random.nextInt(10));
 		}
 		return sb.toString();
@@ -90,8 +90,8 @@ public class MsgFunctionConfig {
 
 	public static String generateVerifyContent(MsgFunctionInfo msgFunctionInfo, String msgCode, boolean isMobile,
 			boolean isEmail) {
-		String verifyTime = MsgFunctionConfig.parseValidTimeToString(AppConfig.VerfiyCodeValidTime);
-		String appName = AppConfig.CompanyName;
+		String verifyTime = MsgFunctionConfig.parseValidTimeToString(AppConfig.VerfiyCodeValidTime());
+		String appName = AppConfig.CompanyName();
 		String msgTypeNormal = isEmail ? "通过邮箱" : "通过手机";
 		String msgTypeEmail = isEmail ? "通过邮箱" : "";
 		String msgTypeMobile = isMobile ? "通过手机" : "";

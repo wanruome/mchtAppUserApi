@@ -6,6 +6,10 @@
 package com.newpay.webauth.config;
 
 public class AppConfigNew {
+	public static String CompanyName() {
+		return ConfigUtil.getValString("CompanyName", "浙江盛炬支付");
+	}
+
 	public static Long KeyPairPublicKeyValidTime() {
 		return ConfigUtil.getValLongTime("keypair.publickey_valid_time");
 	}
@@ -46,7 +50,7 @@ public class AppConfigNew {
 		return ConfigUtil.getValLongTime("usertoken.deletetime");
 	}
 
-	public Integer VerfiyCodeLength() {
+	public static Integer VerfiyCodeLength() {
 		int value = ConfigUtil.getValInteger("msg.verify_code_length", 6);
 		if (value < 4) {
 			value = 4;
@@ -61,40 +65,40 @@ public class AppConfigNew {
 		return ConfigUtil.getValLongTime("msg.verify_code_valid_time", 15 * 60 * 1000l);
 	}
 
-	public static Integer MSGSEND_LIMITCOUNT_EMAIL() {
+	public static Integer MsgSendLimitCountEmail() {
 		return ConfigUtil.getValInteger("msgsend.limitcount_email");
 	}
 
-	public static Integer MSGSEND_LIMITCOUNT_MOBILE() {
+	public static Integer MsgSendLimitCountMobile() {
 		return ConfigUtil.getValInteger("msgsend.limitcount_mobile");
 	}
 
-	public static Integer MSGSEND_LIMITCOUNT_UUID() {
+	public static Integer MsgSendLimitCountUuid() {
 		return ConfigUtil.getValInteger("msgsend.limitcount_uuid");
 	}
 
-	public static Integer MSGSEND_LIMITCOUNT_USER() {
+	public static Integer MsgSendLimitCountUser() {
 		return ConfigUtil.getValInteger("msgsend.limitcount_user");
 	}
 
-	public static String SMS_SERVICE_URL() {
+	public static String SmsServicrUrl() {
 		return ConfigUtil.getValString("sms.service.url");
 	}
 
-	public static String SMS_SERVICE_SYSTEMID() {
+	public static String SmsServicrSystemId() {
 		return ConfigUtil.getValString("sms.service.systemId");
 	}
 
-	public static Boolean SMS_SERVICE_ASYNC() {
+	public static Boolean SmsServiceAsync() {
 		return ConfigUtil.getValBoolean("sms.service.async", true);
 	}
 
-	public static Integer APPINFO_MODIFY_LIMIT_ONE() {
-		return ConfigUtil.getValInteger("appinfo.modify.limitone");
+	public static Boolean AppInfoModifyLimitOne() {
+		return ConfigUtil.getValBoolean("appinfo.modify.limitone", true);
 	}
 
-	public static Boolean SYSTEMLOG_ASYNC() {
-		return ConfigUtil.getValBoolean("systemlog.async");
+	public static Boolean SystemLogAsync() {
+		return ConfigUtil.getValBoolean("systemlog.async", true);
 	}
 
 }

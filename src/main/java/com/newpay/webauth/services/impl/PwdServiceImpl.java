@@ -30,10 +30,10 @@ public class PwdServiceImpl implements PwdService {
 	UuidKeyPairMapper uuidKeyPairMapper;
 
 	private boolean isEncryptTypeOk(String pwdEncrypt) {
-		if (StringUtils.isEmpty(AppConfig.UserPwdEncryptMethod)) {
+		if (StringUtils.isEmpty(AppConfig.UserPwdEncryptMethod())) {
 			return false;
 		}
-		return AppConfig.UserPwdEncryptMethod.contains("|" + pwdEncrypt + "|");
+		return AppConfig.UserPwdEncryptMethod().contains("|" + pwdEncrypt + "|");
 	}
 
 	private boolean isPwdRuleOK(String pwd, int minLength, int maxLength, int minRule, boolean isRuleCheck) {
@@ -163,7 +163,7 @@ public class PwdServiceImpl implements PwdService {
 		}
 		String keyVersion = resultUuidKeyPair.getKeyVersion();
 		boolean versionCacheFlag = TimeUtils.isCacheOk(keyVersion, AppConfig.SDF_DB_VERSION,
-				AppConfig.KeyPairPublicKeyValidTime);
+				AppConfig.KeyPairPublicKeyValidTime());
 		if (!versionCacheFlag) {
 			return null;
 		}
@@ -216,8 +216,8 @@ public class PwdServiceImpl implements PwdService {
 			return pwdParse;
 		}
 		if (pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_NONE)) {
-			if (isPwdRuleOK(pwdRequest, AppConfig.UserPwdMinLength, AppConfig.UserPwdMaxLength,
-					AppConfig.UserPwdMinRule, isRuleCheck)) {
+			if (isPwdRuleOK(pwdRequest, AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(),
+					AppConfig.UserPwdMinRule(), isRuleCheck)) {
 				String pwdResult = EncryptUtils.encodingMD5(EncryptUtils.encodingMD5(pwdRequest));
 				pwdParse.setPwdParse(pwdResult);
 				pwdParse.setValid(true);
@@ -225,8 +225,8 @@ public class PwdServiceImpl implements PwdService {
 				return pwdParse;
 			}
 			else {
-				String msg = parsePwdRuleToString(AppConfig.UserPwdMinLength, AppConfig.UserPwdMaxLength,
-						AppConfig.UserPwdMinRule);
+				String msg = parsePwdRuleToString(AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(),
+						AppConfig.UserPwdMinRule());
 				pwdParse.setValid(false);
 				pwdParse.setReturnResp(ResultFactory.toNackPARAM(msg));
 				return pwdParse;
@@ -273,8 +273,8 @@ public class PwdServiceImpl implements PwdService {
 				return pwdParse;
 			}
 			else {
-				if (isPwdRuleOK(pwd, AppConfig.UserPwdMinLength, AppConfig.UserPwdMaxLength, AppConfig.UserPwdMinRule,
-						isRuleCheck)) {
+				if (isPwdRuleOK(pwd, AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(),
+						AppConfig.UserPwdMinRule(), isRuleCheck)) {
 					String pwdResult = EncryptUtils.encodingMD5(EncryptUtils.encodingMD5(pwd));
 					pwdParse.setPwdParse(pwdResult);
 					pwdParse.setValid(true);
@@ -282,8 +282,8 @@ public class PwdServiceImpl implements PwdService {
 					return pwdParse;
 				}
 				else {
-					String msg = parsePwdRuleToString(AppConfig.UserPwdMinLength, AppConfig.UserPwdMaxLength,
-							AppConfig.UserPwdMinRule);
+					String msg = parsePwdRuleToString(AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(),
+							AppConfig.UserPwdMinRule());
 					pwdParse.setValid(false);
 					pwdParse.setReturnResp(ResultFactory.toNackPARAM(msg));
 					return pwdParse;

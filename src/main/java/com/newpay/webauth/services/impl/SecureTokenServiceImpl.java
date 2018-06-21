@@ -97,7 +97,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 				try {
 					long timeLastValidTime = AppConfig.SDF_DB_VERSION.parse(resultUUIDToken.getValidTime()).getTime();
 					long timeSkip = new Date().getTime() - timeLastValidTime;
-					if (timeSkip < 0 || timeSkip > AppConfig.UserToken_DeleteTime) {
+					if (timeSkip < 0 || timeSkip > AppConfig.UserToken_DeleteTime()) {
 						tokenResponseParse.setReturnResp(jsonResult);
 						return tokenResponseParse;
 					}
@@ -115,7 +115,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 
 		Date nowTime = new Date();
 		String nowTimeStr = AppConfig.SDF_DB_VERSION.format(nowTime);
-		String validTimeString = TimeUtils.formatTime(nowTime.getTime() + AppConfig.UserToken_ValidTime,
+		String validTimeString = TimeUtils.formatTime(nowTime.getTime() + AppConfig.UserToken_ValidTime(),
 				AppConfig.SDF_DB_VERSION);
 		LoginUserToken outUserToken = new LoginUserToken();
 		outUserToken.setAppId(appId);
@@ -247,7 +247,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 				long timeLastValidTime = AppConfig.SDF_DB_VERSION.parse(resultLoginUserAccount.getLastAuthTime())
 						.getTime();
 				long timeSkip = new Date().getTime() - timeLastValidTime;
-				if (timeSkip < 0 || timeSkip > AppConfig.UserUuidAuthTime) {
+				if (timeSkip < 0 || timeSkip > AppConfig.UserUuidAuthTime()) {
 					return false;
 				}
 				else {

@@ -40,12 +40,12 @@ public class MsgSendThread extends Thread {
 			map.put("pszMobis", mobile);
 			map.put("pszMsg", content);
 			map.put("iMobiCount", "1");
-			map.put("systemId", AppConfig.SMS_SERVICE_SYSTEMID);
+			map.put("systemId", AppConfig.SmsServicrSystemId());
 			map.put("functionId", functionId);
 			// String urlGet = OkHttpConfig.createRequestUrlForGet(AppConfig.SMS_SERVICE_URL, map);
 			RequestBody mRequestBody = OkHttpConfig.createRequestFormBody(map);
-			ResponseData responseData = new DataOKHttp().setUrl(AppConfig.SMS_SERVICE_URL).setRequestBody(mRequestBody)
-					.doHttp(String.class);
+			ResponseData responseData = new DataOKHttp().setUrl(AppConfig.SmsServicrUrl())
+					.setRequestBody(mRequestBody).doHttp(String.class);
 			if ("0000".equals(responseData.getResultObject())) {
 				return true;
 			}

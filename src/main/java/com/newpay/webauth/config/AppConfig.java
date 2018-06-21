@@ -7,108 +7,100 @@ package com.newpay.webauth.config;
 
 import java.text.SimpleDateFormat;
 
-import com.ruomm.base.tools.PropertyReader;
-
 public class AppConfig {
-	// 从WebApp.properties读取的配置属性值
-	public static PropertyReader configProperty = new PropertyReader("config/app/webConfig.properties");
-	public static String CompanyName = null;
-	public static Long KeyPairPublicKeyValidTime = null;
-	public static Long KeyPairPublicKeyGetSkipTime = null;
-	public static String UserPwdEncryptMethod = null;
-	// public static String UserPwdEncryptDefault = null;
-
-	public static Integer UserPwdMinLength = null;
-	public static Integer UserPwdMaxLength = null;
-	/**
-	 * * 数字、大写字母、小写字母、特殊符号 密码强度，0不限制，1不能为纯数字，2为至少2种组合，3为至少3种组合，4为4种组合 //
-	 */
-	public static Integer UserPwdMinRule = null;
-	public static Integer UserPwdErrLimit = null;
-	public static Long UserUuidAuthTime = null;
-	public static Long UserToken_ValidTime = null;
-	public static Long UserToken_DeleteTime = null;
-	public static Integer VerfiyCodeLength = null;
-	public static Long VerfiyCodeValidTime = null;
-	public static Integer MSGSEND_LIMITCOUNT_EMAIL = null;
-	public static Integer MSGSEND_LIMITCOUNT_MOBILE = null;
-	public static Integer MSGSEND_LIMITCOUNT_UUID = null;
-	public static Integer MSGSEND_LIMITCOUNT_USER = null;
-	public static String SMS_SERVICE_URL = null;
-	public static String SMS_SERVICE_SYSTEMID = null;
-	public static Boolean SMS_SERVICE_ASYNC = null;
-	public static Integer APPINFO_MODIFY_LIMIT_ONE = null;
-	public static Boolean SYSTEMLOG_ASYNC = null;
-
-	static {
-		forceLoadProperty();
+	public static String CompanyName() {
+		return ConfigUtil.getValString("CompanyName", "浙江盛炬支付");
 	}
 
-	public static void resetPropertyData() {
-		CompanyName = null;
-		KeyPairPublicKeyValidTime = null;
-		KeyPairPublicKeyGetSkipTime = null;
-		UserPwdEncryptMethod = null;
-		// UserPwdEncryptDefault = null;
-		UserPwdMinLength = null;
-		UserPwdMaxLength = null;
-		UserPwdMinRule = null;
-		UserPwdErrLimit = null;
-		UserUuidAuthTime = null;
-		UserToken_ValidTime = null;
-		UserToken_DeleteTime = null;
-		VerfiyCodeLength = null;
-		VerfiyCodeValidTime = null;
-		MSGSEND_LIMITCOUNT_EMAIL = null;
-		MSGSEND_LIMITCOUNT_MOBILE = null;
-		MSGSEND_LIMITCOUNT_UUID = null;
-		MSGSEND_LIMITCOUNT_USER = null;
-		SMS_SERVICE_URL = null;
-		SMS_SERVICE_SYSTEMID = null;
-		SMS_SERVICE_ASYNC = null;
-		APPINFO_MODIFY_LIMIT_ONE = null;
-		SYSTEMLOG_ASYNC = null;
+	public static Long KeyPairPublicKeyValidTime() {
+		return ConfigUtil.getValLongTime("keypair.publickey_valid_time");
 	}
 
-	public synchronized static void forceLoadProperty() {
-		try {
-			resetPropertyData();
-			configProperty.forceLoadProperty();
-			CompanyName = configProperty.getValString("CompanyName", "浙江盛炬支付");
-			KeyPairPublicKeyValidTime = configProperty.getValLongTime("keypair.publickey_valid_time");
-			KeyPairPublicKeyGetSkipTime = configProperty.getValLongTime("keypair.publickey_get_skip_time");
-			UserPwdEncryptMethod = configProperty.getValString("user.pwd_encrypt_method");
-			// UserPwdEncryptDefault = configProperty.getValString("user.pwd_encrypt_default");
-			UserPwdMinLength = configProperty.getValInteger("user.pwd_min_length");
-			UserPwdMaxLength = configProperty.getValInteger("user.pwd_max_length", 24);
-			UserPwdMinRule = configProperty.getValInteger("user.pwd_min_rule");
-			UserPwdErrLimit = configProperty.getValInteger("user.pwd_err_limit");
-			UserUuidAuthTime = configProperty.getValLongTime("user.uuid_authtime");
-			UserToken_ValidTime = configProperty.getValLongTime("usertoken.validtime");
-			UserToken_DeleteTime = configProperty.getValLongTime("usertoken.deletetime");
-			VerfiyCodeLength = configProperty.getValInteger("msg.verify_code_length", 6);
-			if (VerfiyCodeLength < 4) {
-				VerfiyCodeLength = 4;
-			}
-			if (VerfiyCodeLength > 10) {
-				VerfiyCodeLength = 10;
-			}
-			VerfiyCodeValidTime = configProperty.getValLongTime("msg.verify_code_valid_time", 15 * 60 * 1000l);
-			MSGSEND_LIMITCOUNT_EMAIL = configProperty.getValInteger("msgsend.limitcount_email");
-			MSGSEND_LIMITCOUNT_MOBILE = configProperty.getValInteger("msgsend.limitcount_mobile");
-			MSGSEND_LIMITCOUNT_UUID = configProperty.getValInteger("msgsend.limitcount_uuid");
-			MSGSEND_LIMITCOUNT_USER = configProperty.getValInteger("msgsend.limitcount_user");
-			SMS_SERVICE_URL = configProperty.getValString("sms.service.url");
-			SMS_SERVICE_SYSTEMID = configProperty.getValString("sms.service.systemId");
-			SMS_SERVICE_ASYNC = configProperty.getValBoolean("sms.service.async", true);
-			APPINFO_MODIFY_LIMIT_ONE = configProperty.getValInteger("appinfo.modify.limitone");
-			SYSTEMLOG_ASYNC = configProperty.getValBoolean("systemlog.async");
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			resetPropertyData();
-		}
+	public static Long KeyPairPublicKeyGetSkipTime() {
+		return ConfigUtil.getValLongTime("keypair.publickey_get_skip_time");
+	}
 
+	public static String UserPwdEncryptMethod() {
+		return ConfigUtil.getValString("user.pwd_encrypt_method");
+	}
+
+	public static Integer UserPwdMinLength() {
+		return ConfigUtil.getValInteger("user.pwd_min_length");
+	}
+
+	public static Integer UserPwdMaxLength() {
+		return ConfigUtil.getValInteger("user.pwd_max_length", 24);
+	}
+
+	public static Integer UserPwdMinRule() {
+		return ConfigUtil.getValInteger("user.pwd_min_rule");
+	}
+
+	public static Integer UserPwdErrLimit() {
+		return ConfigUtil.getValInteger("user.pwd_err_limit");
+	}
+
+	public static Long UserUuidAuthTime() {
+		return ConfigUtil.getValLongTime("user.uuid_authtime");
+	}
+
+	public static Long UserToken_ValidTime() {
+		return ConfigUtil.getValLongTime("usertoken.validtime");
+	}
+
+	public static Long UserToken_DeleteTime() {
+		return ConfigUtil.getValLongTime("usertoken.deletetime");
+	}
+
+	public static Integer VerfiyCodeLength() {
+		int value = ConfigUtil.getValInteger("msg.verify_code_length", 6);
+		if (value < 4) {
+			value = 4;
+		}
+		if (value > 10) {
+			value = 10;
+		}
+		return value;
+	}
+
+	public static Long VerfiyCodeValidTime() {
+		return ConfigUtil.getValLongTime("msg.verify_code_valid_time", 15 * 60 * 1000l);
+	}
+
+	public static Integer MsgSendLimitCountEmail() {
+		return ConfigUtil.getValInteger("msgsend.limitcount_email");
+	}
+
+	public static Integer MsgSendLimitCountMobile() {
+		return ConfigUtil.getValInteger("msgsend.limitcount_mobile");
+	}
+
+	public static Integer MsgSendLimitCountUuid() {
+		return ConfigUtil.getValInteger("msgsend.limitcount_uuid");
+	}
+
+	public static Integer MsgSendLimitCountUser() {
+		return ConfigUtil.getValInteger("msgsend.limitcount_user");
+	}
+
+	public static String SmsServicrUrl() {
+		return ConfigUtil.getValString("sms.service.url");
+	}
+
+	public static String SmsServicrSystemId() {
+		return ConfigUtil.getValString("sms.service.systemId");
+	}
+
+	public static Boolean SmsServiceAsync() {
+		return ConfigUtil.getValBoolean("sms.service.async", true);
+	}
+
+	public static Boolean AppInfoModifyLimitOne() {
+		return ConfigUtil.getValBoolean("appinfo.modify.limitone", true);
+	}
+
+	public static Boolean SystemLogAsync() {
+		return ConfigUtil.getValBoolean("systemlog.async", true);
 	}
 
 	public static final Integer OKHTTP_CONNECT_TIMEOUT = 5;

@@ -68,13 +68,13 @@ public class MsgSendServiceImpl implements MsgSendService {
 	public int getRemindCount(MsgSendReqDto msgSendReqDto, MsgFunctionInfo msgFunctionInfo, boolean isMobile) {
 		int limit = 1000;
 		String dateStr = AppConfig.SDF_DB_DATE.format(new Date());
-		if (AppConfig.MSGSEND_LIMITCOUNT_MOBILE > 0 & isMobile) {
+		if (AppConfig.MsgSendLimitCountMobile() > 0 & isMobile) {
 
 			MsgSendInfo queryMsgInfo = new MsgSendInfo();
 			queryMsgInfo.setMsgAddr(msgSendReqDto.getMsgAddr());
 			queryMsgInfo.setCreateDate(dateStr);
 			int countSend = msgSendInfoMapper.selectCount(queryMsgInfo);
-			int countRemind = AppConfig.MSGSEND_LIMITCOUNT_MOBILE - countSend;
+			int countRemind = AppConfig.MsgSendLimitCountMobile() - countSend;
 			if (limit > countRemind) {
 				limit = countRemind;
 			}
@@ -82,12 +82,12 @@ public class MsgSendServiceImpl implements MsgSendService {
 		if (limit < 1) {
 			return limit;
 		}
-		if (AppConfig.MSGSEND_LIMITCOUNT_EMAIL > 0 & !isMobile) {
+		if (AppConfig.MsgSendLimitCountEmail() > 0 & !isMobile) {
 			MsgSendInfo queryMsgInfo = new MsgSendInfo();
 			queryMsgInfo.setMsgAddr(msgSendReqDto.getMsgAddr());
 			queryMsgInfo.setCreateDate(dateStr);
 			int countSend = msgSendInfoMapper.selectCount(queryMsgInfo);
-			int countRemind = AppConfig.MSGSEND_LIMITCOUNT_EMAIL - countSend;
+			int countRemind = AppConfig.MsgSendLimitCountEmail() - countSend;
 			if (limit > countRemind) {
 				limit = countRemind;
 			}
@@ -95,12 +95,12 @@ public class MsgSendServiceImpl implements MsgSendService {
 		if (limit < 1) {
 			return limit;
 		}
-		if (AppConfig.MSGSEND_LIMITCOUNT_UUID > 0) {
+		if (AppConfig.MsgSendLimitCountUuid() > 0) {
 			MsgSendInfo queryMsgInfo = new MsgSendInfo();
 			queryMsgInfo.setUuid(msgSendReqDto.getUuid());
 			queryMsgInfo.setCreateDate(dateStr);
 			int countSend = msgSendInfoMapper.selectCount(queryMsgInfo);
-			int countRemind = AppConfig.MSGSEND_LIMITCOUNT_UUID - countSend;
+			int countRemind = AppConfig.MsgSendLimitCountUuid() - countSend;
 			if (limit > countRemind) {
 				limit = countRemind;
 			}
@@ -108,13 +108,13 @@ public class MsgSendServiceImpl implements MsgSendService {
 		if (limit < 1) {
 			return limit;
 		}
-		if (AppConfig.MSGSEND_LIMITCOUNT_USER > 0
+		if (AppConfig.MsgSendLimitCountUser() > 0
 				&& (msgFunctionInfo.getAuthType() == 1 || msgFunctionInfo.getAuthType() == 2)) {
 			MsgSendInfo queryMsgInfo = new MsgSendInfo();
 			queryMsgInfo.setUserId(msgSendReqDto.getUserId());
 			queryMsgInfo.setCreateDate(dateStr);
 			int countSend = msgSendInfoMapper.selectCount(queryMsgInfo);
-			int countRemind = AppConfig.MSGSEND_LIMITCOUNT_USER - countSend;
+			int countRemind = AppConfig.MsgSendLimitCountUser() - countSend;
 			if (limit > countRemind) {
 				limit = countRemind;
 			}
@@ -180,7 +180,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String msgContent = MsgFunctionConfig.generateVerifyContent(msgFunctionInfo, msgCode, isMobile, isEmail);
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
-		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime,
+		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime(),
 				AppConfig.SDF_DB_VERSION);
 		String createDate = AppConfig.SDF_DB_DATE.format(nowDate);
 		String createTime = AppConfig.SDF_DB_VERSION.format(nowDate);
@@ -312,7 +312,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String msgContent = MsgFunctionConfig.generateVerifyContent(msgFunctionInfo, msgCode, isMobile, isEmail);
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
-		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime,
+		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime(),
 				AppConfig.SDF_DB_VERSION);
 		String createDate = AppConfig.SDF_DB_DATE.format(nowDate);
 		String createTime = AppConfig.SDF_DB_VERSION.format(nowDate);
@@ -400,7 +400,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String msgContent = MsgFunctionConfig.generateVerifyContent(msgFunctionInfo, msgCode, isMobile, isEmail);
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
-		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime,
+		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime(),
 				AppConfig.SDF_DB_VERSION);
 		String createDate = AppConfig.SDF_DB_DATE.format(nowDate);
 		String createTime = AppConfig.SDF_DB_VERSION.format(nowDate);
@@ -481,7 +481,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 
 	private void doMsgSend(String mobile, String content, String functionId, boolean isMoile) {
 		if (isMoile) {
-			if (AppConfig.SMS_SERVICE_ASYNC) {
+			if (AppConfig.SmsServiceAsync()) {
 				new MsgSendThread(content, mobile, functionId).start();
 			}
 			else {

@@ -164,7 +164,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 			return ResultFactory.toNackCORE("用户不存在");
 		}
 		SystemLogThreadLocal.setUserId(resultLoginUserAccount.getLoginId());
-		if (null != resultLoginUserAccount.getPwdErrCount() && AppConfig.UserPwdErrLimit > 0
+		if (null != resultLoginUserAccount.getPwdErrCount() && AppConfig.UserPwdErrLimit() > 0
 				&& resultLoginUserAccount.getPwdErrCount() > 5) {
 			return ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "密码错误次数过多，请验证登录或找回密码");
 		}

@@ -20,10 +20,19 @@ public class ConfigUtil {
 
 	public static void forceLoadProperty() {
 		configKeyValueMap = null;
-		loadProperty();
+		loadPropertySynchronized();
 	}
 
-	private static synchronized void loadProperty() {
+	private static void loadProperty() {
+		if (null != configKeyValueMap) {
+			return;
+		}
+		else {
+			loadPropertySynchronized();
+		}
+	}
+
+	private static synchronized void loadPropertySynchronized() {
 		if (null != configKeyValueMap) {
 			return;
 		}

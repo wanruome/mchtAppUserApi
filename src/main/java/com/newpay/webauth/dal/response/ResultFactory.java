@@ -180,7 +180,7 @@ public class ResultFactory {
 		}
 		try {
 			if (null != sysLogBean) {
-				if (AppConfig.SYSTEMLOG_ASYNC) {
+				if (AppConfig.SystemLogAsync()) {
 					new SystemLogThread(sysLogBean, realCode, realMsg).start();
 				}
 				else {

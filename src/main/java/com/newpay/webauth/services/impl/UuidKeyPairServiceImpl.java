@@ -75,7 +75,7 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 		else {
 			String keyVersion = resultUuidKeyPair.getKeyVersion();
 			boolean versionCacheFlag = TimeUtils.isCacheOk(keyVersion, AppConfig.SDF_DB_VERSION,
-					AppConfig.KeyPairPublicKeyGetSkipTime);
+					AppConfig.KeyPairPublicKeyGetSkipTime());
 			// long timeSkip = -1000l;
 			// try {
 			// timeSkip = Math.abs(new Date().getTime() -

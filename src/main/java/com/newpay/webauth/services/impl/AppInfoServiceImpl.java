@@ -194,7 +194,7 @@ public class AppInfoServiceImpl implements AppInfoService {
 		if (modifyCount <= 0) {
 			return ResultFactory.toNackPARAM();
 		}
-		if (AppConfig.APPINFO_MODIFY_LIMIT_ONE > 0 && modifyCount > 1) {
+		if (AppConfig.AppInfoModifyLimitOne() && modifyCount > 1) {
 			return ResultFactory.toNackCORE("只能逐项修改应用信息");
 		}
 		boolean verifyFlag = appInfoModify.doVerifySignInfo(resultAppInfo.getPublicKey());

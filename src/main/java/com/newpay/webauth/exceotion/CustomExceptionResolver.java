@@ -63,7 +63,7 @@ public class CustomExceptionResolver implements HandlerExceptionResolver {
 			}
 			try {
 				if (null != sysLogBean) {
-					if (AppConfig.SYSTEMLOG_ASYNC) {
+					if (AppConfig.SystemLogAsync()) {
 						new SystemLogThread(sysLogBean, ResultFactory.ERR_UNKNOWN, "系统异常").start();
 					}
 					else {
