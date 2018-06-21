@@ -157,6 +157,7 @@ public class ResultFactory {
 			}
 
 		}
+		log.info("请求返回结果:" + resultJson.toJSONString());
 		// 写入日志
 		SysLogBean sysLogBean = null;
 		try {

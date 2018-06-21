@@ -14,6 +14,9 @@ import com.newpay.webauth.dal.model.DbSequence;
 import com.newpay.webauth.services.DbSeqService;
 import com.ruomm.base.tools.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class DbSeqServiceImpl implements DbSeqService {
 	@Autowired
@@ -26,7 +29,7 @@ public class DbSeqServiceImpl implements DbSeqService {
 			return null;
 		}
 		if (null == dbType || !dbType.toLowerCase().equals("oracle")) {
-			System.out.println("数据库类型1：" + dbType);
+			log.debug("数据库类型1：" + dbType);
 			int value = getSeqForMySQL(seqName, insertValue);
 			if (value > 0) {
 				return StringUtils.nullStrToEmpty(headerName) + value + "";
@@ -36,7 +39,7 @@ public class DbSeqServiceImpl implements DbSeqService {
 			}
 		}
 		else {
-			System.out.println("数据库类型2：" + dbType);
+			log.debug("数据库类型2：" + dbType);
 			long value = dbSequenceMapper.getSeqNextval(seqName);
 			if (value > 0) {
 				return StringUtils.nullStrToEmpty(headerName) + value + "";

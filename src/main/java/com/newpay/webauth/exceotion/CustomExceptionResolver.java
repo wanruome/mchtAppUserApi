@@ -34,8 +34,8 @@ public class CustomExceptionResolver implements HandlerExceptionResolver {
 		ex.printStackTrace();
 		boolean isApp = false;
 		try {
-			String[] realUriArray = BaseWebUtils.getRealUriToArray(request.getRequestURI());
-			if (realUriArray[1].equals("app")) {
+			String[] uris = BaseWebUtils.getRealUriToArray(request.getRequestURI());
+			if (null != uris && uris.length >= 2 && "app".equals(uris[1])) {
 				isApp = true;
 			}
 			else {

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.newpay.webauth.config.PropertyUtil;
 import com.newpay.webauth.dal.core.PwdRequestParse;
 import com.newpay.webauth.dal.request.userinfo.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
@@ -44,7 +43,7 @@ public class UserAccoutController {
 	@ApiOperation("用户注册")
 	@PostMapping("/doRegister")
 	public Object doRegister(@Valid @RequestBody UserInfoRegisterReqDto userInfoRegister, BindingResult bindingResult) {
-		System.out.println(PropertyUtil.getProperty("pwd_encrypt_limit"));
+		;
 		if (null == bindingResult || bindingResult.hasErrors()) {
 			return ResultFactory.toNackPARAM();
 		}

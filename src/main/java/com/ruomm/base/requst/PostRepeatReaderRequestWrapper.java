@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
@@ -22,7 +23,11 @@ public class PostRepeatReaderRequestWrapper extends HttpServletRequestWrapper {
 	public PostRepeatReaderRequestWrapper(HttpServletRequest request) throws IOException {
 		super(request);
 		body = readBytes(request.getInputStream());
-
+		String tmp = new String(body);
+		System.out.println(tmp);
+		Map<String, String[]> data = request.getParameterMap();
+		System.out.println(data);
+		System.out.println(body);
 	}
 
 	@Override

@@ -52,6 +52,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	@Override
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws IOException {
 		// TODO Auto-generated method stub
+		log.debug("onAccessDenied");
 		return processAccessDeniedFastJson(request, response);
 
 	}
@@ -60,12 +61,12 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		JSONObject jsonObject = null;
 		try {
 			jsonObject = JSON.parseObject(IOUtils.toString(request.getInputStream(), "UTF-8"));
+			log.info("请求信息:" + jsonObject.toJSONString());
 		}
 		catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
-
 		Map<String, String> jsonKeyMap = FastJsonTools.parseJsonKeyMap(jsonObject);
 		if (null == jsonKeyMap) {
 			throwException(response, ResultFactory.ERR_PARSE_REQUEST);
@@ -76,7 +77,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 
 		SystemLogFunction systemLogFunction = SystemLogFunctionConfig.getSystemLogFuntionInfoByURI(request);
 		if (null != systemLogFunction) {
-			log.debug(systemLogFunction.toString());
+			log.debug("日志写入开启:" + systemLogFunction.toString());
 			String userId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_USER_ID);
 			String logKeyValue = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap,
 					systemLogFunction.getLogKeyFieldName());
@@ -102,9 +103,8 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		}
 		// 进行短信验证码验证流程
 		String verifyCode = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_VERIFY_CODE);
-		UserInfoModifyMobie userInfoModifyMobie = jsonObject.toJavaObject(UserInfoModifyMobie.class);
-		System.out.println(userInfoModifyMobie.toString());
 		if (!StringUtils.isEmpty(verifyCode)) {
+			log.debug("进行短信验证:" + verifyCode);
 			MsgFunctionInfo msgFunctionInfo = MsgFunctionConfig.getMsgFuntionInfoByURI(request);
 			if (null == msgFunctionInfo) {
 				throwException(response, ResultFactory.ERR_MSGCODE_INVALID, "此功能不需要短信验证码");
@@ -183,10 +183,12 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
 			String token = getTokenById(tokenId, userId, appId);
 			if (SignTools.verifySign(jsonObject, token)) {
+				log.debug("签名验证成功");
 				return true;
 			}
 			{
 				throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+				log.debug("签名验证失败");
 				return false;
 			}
 
@@ -301,7 +303,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	@Override
 	protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue)
 			throws Exception {
-		System.out.println("isAccessAllowed");
+		log.debug("isAccessAllowed");
 		return false;
 
 		// HttpServletRequest req = (HttpServletRequest) request;

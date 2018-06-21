@@ -16,6 +16,9 @@ import com.newpay.webauth.dal.model.SystemLogFunction;
 import com.newpay.webauth.services.SystemLogFunctionService;
 import com.ruomm.base.tools.BaseWebUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class SystemLogFunctionConfig {
 	private static Map<String, SystemLogFunction> systemLogFunctionMap = null;
 
@@ -57,7 +60,7 @@ public class SystemLogFunctionConfig {
 			SystemLogFunctionService systemLogFunctionInfoService = SpringContextHolder
 					.getBean(SystemLogFunctionService.class);
 			systemLogFunctionMap = systemLogFunctionInfoService.getAllEnableSystemLogFunction();
-			System.out.println(systemLogFunctionMap);
+			log.debug(systemLogFunctionMap.toString());
 		}
 		catch (Exception e) {
 			e.printStackTrace();

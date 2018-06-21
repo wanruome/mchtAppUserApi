@@ -17,6 +17,9 @@ import com.newpay.webauth.dal.model.MsgFunctionInfo;
 import com.newpay.webauth.services.MsgFunctionInfoService;
 import com.ruomm.base.tools.BaseWebUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class MsgFunctionConfig {
 	private static Map<String, MsgFunctionInfo> msgFunctionMap = null;
 
@@ -57,7 +60,7 @@ public class MsgFunctionConfig {
 		try {
 			MsgFunctionInfoService msgFunctionInfoService = SpringContextHolder.getBean(MsgFunctionInfoService.class);
 			msgFunctionMap = msgFunctionInfoService.queryAllEnableMsgFunctionInfos();
-			System.out.println(msgFunctionMap);
+			log.debug(msgFunctionMap.toString());
 		}
 		catch (Exception e) {
 			e.printStackTrace();

@@ -26,11 +26,8 @@ public class StatelessDefaultSubjectFactory extends DefaultWebSubjectFactory {
 		// HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletRequest httpRequest = WebUtils.getHttpRequest(context);
 		if (null != httpRequest) {
-			String uri = BaseWebUtils.getRealUri(httpRequest.getRequestURI());
-			// System.out.println(httpRequest.getRequestURI());
-			// String tmp = httpRequest.getSession().toString();
-			// System.out.println(tmp);
-			if (uri.startsWith("/webauth/app/")) {
+			String[] uris = BaseWebUtils.getRealUriToArray(httpRequest.getRequestURI());
+			if (null != uris && uris.length >= 2 && "app".equals(uris[1])) {
 
 				context.setSessionCreationEnabled(false);
 			}
