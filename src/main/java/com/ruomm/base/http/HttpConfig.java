@@ -3,11 +3,17 @@ package com.ruomm.base.http;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.ruomm.base.tools.StringUtils;
+
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 public class HttpConfig {
 	public final static int Code_Success = 200;
@@ -197,6 +203,85 @@ public class HttpConfig {
 			object = null;
 		}
 		return object;
+	}
+
+	public static Request getOkHttpRequest(String url, HashMap<String, String> hashMap, boolean isPost) {
+		if (isPost) {
+			return getOkHttpRequestPost(url, hashMap);
+		}
+		else {
+			return getOkHttpRequestGet(url, hashMap);
+		}
+	}
+
+	private static Request getOkHttpRequestPost(String url, HashMap<String, String> hashMap) {
+		try {
+			RequestBody body = attachFormRequestForamtBody(hashMap);
+			return new Request.Builder().url(url).post(body).build();
+		}
+		catch (Exception e) {
+			return null;
+		}
+
+	}
+
+	private static Request getOkHttpRequestGet(String url, HashMap<String, String> hashMap) {
+		try {
+			String realUrl = attachFormRequestUrl(url, hashMap);
+			return new Request.Builder().url(realUrl).get().build();
+		}
+		catch (Exception e) {
+			return null;
+		}
+
+	}
+
+	// 获取真实的Get请求路径
+	private static String attachFormRequestUrl(String url, HashMap<String, String> hashMap) {
+		if (null == hashMap || hashMap.size() <= 0) {
+			return url;
+		}
+		return url + "?" + attachFormRequestFormatString(hashMap);
+	}
+
+	// 构建Post请求参数
+	private static RequestBody attachFormRequestForamtBody(HashMap<String, String> hashMap) {
+
+		okhttp3.FormBody.Builder mBuilder = new FormBody.Builder();
+		Set<String> sets = hashMap.keySet();
+		for (String key : sets) {
+			String value = hashMap.get(key);
+			if (StringUtils.isEmpty(value)) {
+				mBuilder.add(key, "");
+			}
+			else {
+				mBuilder.add(key, value);
+			}
+
+		}
+		return mBuilder.build();
+	}
+
+	// 构建Get请求参数
+	private static String attachFormRequestFormatString(HashMap<String, String> hashMap) {
+		StringBuilder buf = new StringBuilder();
+		Set<String> sets = hashMap.keySet();
+		int sizeSets = sets.size();
+		int index = 1;
+		for (String key : sets) {
+
+			buf.append(key).append("=");
+			String value = hashMap.get(key);
+			if (!StringUtils.isEmpty(value)) {
+				buf.append(value);
+			}
+			if (index != sizeSets) {
+				buf.append("&");
+			}
+			index++;
+
+		}
+		return buf.toString();
 	}
 
 }

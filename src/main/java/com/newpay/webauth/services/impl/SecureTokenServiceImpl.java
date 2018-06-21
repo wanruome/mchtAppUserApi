@@ -29,6 +29,9 @@ import com.ruomm.base.tools.StringUtils;
 import com.ruomm.base.tools.TimeUtils;
 import com.ruomm.base.tools.TokenUtil;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class SecureTokenServiceImpl implements SecureTokenService {
 	@Autowired
@@ -124,7 +127,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		queryUserToken.setUserId(userId);
 		queryUserToken.setTermType(Integer.valueOf(termType));
 		List<LoginUserToken> resultTermTokenLst = loginUserTokenMapper.selectLoginTokens(queryUserToken);
-		System.out.println(resultTermTokenLst);
+		log.debug("列表返回130", resultTermTokenLst);
 		int loginTermSize = ListUtils.getSize(resultTermTokenLst);
 		int deleteTermSize = loginTermSize >= termTypeLimit ? loginTermSize - termTypeLimit + 1 : 0;
 		if (deleteTermSize > loginTermSize) {
@@ -133,8 +136,13 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		for (int i = 0; i < deleteTermSize; i++) {
 			resultTermTokenLst.get(i).setLoginStatus(0);
 			if (loginUserTokenMapper.updateByPrimaryKeySelective(resultTermTokenLst.get(i)) <= 0) {
+				log.debug("列表返回139", resultTermTokenLst.get(i));
 				tokenResponseParse.setReturnResp(ResultFactory.toNackDB("无法登录"));
 				return tokenResponseParse;
+			}
+			if (resultTermTokenLst.get(i).getTokenId().equals(resultUUIDToken.getTokenId())) {
+				resultUUIDToken.setVersion(resultTermTokenLst.get(i).getVersion() + 1);
+				resultUUIDToken.setLoginStatus(0);
 			}
 		}
 		queryUserToken.setTermType(null);
@@ -149,8 +157,13 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		for (int i = 0; i < deleteTotalSize; i++) {
 			resultTotalTokenLst.get(i).setLoginStatus(0);
 			if (loginUserTokenMapper.updateByPrimaryKeySelective(resultTotalTokenLst.get(i)) <= 0) {
+				log.debug("列表返回156", resultTotalTokenLst.get(i));
 				tokenResponseParse.setReturnResp(ResultFactory.toNackDB("无法登录"));
 				return tokenResponseParse;
+			}
+			if (resultTotalTokenLst.get(i).getTokenId().equals(resultUUIDToken.getTokenId())) {
+				resultUUIDToken.setVersion(resultTotalTokenLst.get(i).getVersion() + 1);
+				resultUUIDToken.setLoginStatus(0);
 			}
 		}
 
@@ -181,6 +194,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 				return tokenResponseParse;
 			}
 			else {
+				log.debug("列表返回189", loginUserToken);
 				tokenResponseParse.setReturnResp(ResultFactory.toNackDB("无法登录"));
 				return tokenResponseParse;
 			}
@@ -214,6 +228,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 				return tokenResponseParse;
 			}
 			else {
+				log.debug("列表返回223", loginUserToken);
 				tokenResponseParse.setReturnResp(ResultFactory.toNackDB("无法登录"));
 				return tokenResponseParse;
 			}

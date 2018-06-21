@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.MsgFunctionConfig;
+import com.newpay.webauth.dal.core.MsgSendThread;
 import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
 import com.newpay.webauth.dal.mapper.MsgAuthInfoMapper;
 import com.newpay.webauth.dal.mapper.MsgSendInfoMapper;
@@ -229,6 +230,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 			return ResultFactory.toNackDB();
 		}
 		else {
+			doMsgSend(msgAddr, msgContent, functionId, isMobile);
 			Map<String, String> resultData = new HashMap<>();
 			resultData.put("limitCount", limitCount - 1 + "");
 			return ResultFactory.toAck(resultData);
@@ -360,6 +362,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 			return ResultFactory.toNackDB();
 		}
 		else {
+			doMsgSend(msgAddr, msgContent, functionId, isMobile);
 			Map<String, String> resultData = new HashMap<>();
 			resultData.put("limitCount", limitCount - 1 + "");
 			return ResultFactory.toAck(resultData);
@@ -445,6 +448,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 			return ResultFactory.toNackDB();
 		}
 		else {
+			doMsgSend(msgAddr, msgContent, functionId, isMobile);
 			Map<String, String> resultData = new HashMap<>();
 			resultData.put("limitCount", limitCount - 1 + "");
 			return ResultFactory.toAck(resultData);
@@ -473,6 +477,18 @@ public class MsgSendServiceImpl implements MsgSendService {
 			dataResult.put("functionTo", resultMsgAuthInfo.getFunctionToId());
 			return ResultFactory.toAck(dataResult);
 		}
+	}
+
+	private void doMsgSend(String mobile, String content, String functionId, boolean isMoile) {
+		if (isMoile) {
+			if (AppConfig.SMS_SERVICE_ASYNC) {
+				new MsgSendThread(content, mobile, functionId).start();
+			}
+			else {
+				MsgSendThread.doMsgSend(mobile, content, functionId);
+			}
+		}
+
 	}
 
 }

@@ -107,4 +107,8 @@ public class DbSeqServiceImpl implements DbSeqService {
 		return getSeqByName("SYSTEM_LOG_NEW_PK", null, 100000);
 	}
 
+	public String getRepayMentBankCardNewPK() {
+		return getSeqByName("RM_BANKCARD_NEW_PK", null, 100000);
+	}
+
 }

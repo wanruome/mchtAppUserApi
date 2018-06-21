@@ -11,7 +11,7 @@ import com.ruomm.base.tools.PropertyReader;
 
 public class AppConfig {
 	// 从WebApp.properties读取的配置属性值
-	public static PropertyReader configProperty = new PropertyReader("config/app/WebApp.properties");
+	public static PropertyReader configProperty = new PropertyReader("config/app/webConfig.properties");
 	public static String CompanyName = null;
 	public static Long KeyPairPublicKeyValidTime = null;
 	public static Long KeyPairPublicKeyGetSkipTime = null;
@@ -34,6 +34,9 @@ public class AppConfig {
 	public static Integer MSGSEND_LIMITCOUNT_MOBILE = null;
 	public static Integer MSGSEND_LIMITCOUNT_UUID = null;
 	public static Integer MSGSEND_LIMITCOUNT_USER = null;
+	public static String SMS_SERVICE_URL = null;
+	public static String SMS_SERVICE_SYSTEMID = null;
+	public static Boolean SMS_SERVICE_ASYNC = null;
 	public static Integer APPINFO_MODIFY_LIMIT_ONE = null;
 	public static Boolean SYSTEMLOG_ASYNC = null;
 
@@ -60,6 +63,9 @@ public class AppConfig {
 		MSGSEND_LIMITCOUNT_MOBILE = null;
 		MSGSEND_LIMITCOUNT_UUID = null;
 		MSGSEND_LIMITCOUNT_USER = null;
+		SMS_SERVICE_URL = null;
+		SMS_SERVICE_SYSTEMID = null;
+		SMS_SERVICE_ASYNC = null;
 		APPINFO_MODIFY_LIMIT_ONE = null;
 		SYSTEMLOG_ASYNC = null;
 	}
@@ -92,6 +98,9 @@ public class AppConfig {
 			MSGSEND_LIMITCOUNT_MOBILE = configProperty.getValInteger("msgsend.limitcount_mobile");
 			MSGSEND_LIMITCOUNT_UUID = configProperty.getValInteger("msgsend.limitcount_uuid");
 			MSGSEND_LIMITCOUNT_USER = configProperty.getValInteger("msgsend.limitcount_user");
+			SMS_SERVICE_URL = configProperty.getValString("sms.service.url");
+			SMS_SERVICE_SYSTEMID = configProperty.getValString("sms.service.systemId");
+			SMS_SERVICE_ASYNC = configProperty.getValBoolean("sms.service.async", true);
 			APPINFO_MODIFY_LIMIT_ONE = configProperty.getValInteger("appinfo.modify.limitone");
 			SYSTEMLOG_ASYNC = configProperty.getValBoolean("systemlog.async");
 		}

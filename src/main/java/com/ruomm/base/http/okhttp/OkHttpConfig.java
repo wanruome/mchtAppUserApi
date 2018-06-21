@@ -55,4 +55,52 @@ public class OkHttpConfig {
 		return mBuilder.build();
 	}
 
+	// 构建Post请求参数
+	public static RequestBody createRequestFormBody(Map<String, String> map) {
+
+		okhttp3.FormBody.Builder mBuilder = new FormBody.Builder();
+		Set<String> sets = map.keySet();
+		for (String key : sets) {
+			String value = map.get(key);
+			if (StringUtils.isEmpty(value)) {
+				mBuilder.add(key, "");
+			}
+			else {
+				mBuilder.add(key, value);
+			}
+
+		}
+		return mBuilder.build();
+	}
+
+	// 获取真实的Get请求路径
+	public static String createRequestUrlForGet(String url, Map<String, String> map) {
+		if (null == map || map.size() <= 0) {
+			return url;
+		}
+		return url + "?" + createRequestBodyFormatString(map);
+	}
+
+	// 构建Get请求参数
+	private static String createRequestBodyFormatString(Map<String, String> hashMap) {
+		StringBuilder buf = new StringBuilder();
+		Set<String> sets = hashMap.keySet();
+		int sizeSets = sets.size();
+		int index = 1;
+		for (String key : sets) {
+
+			buf.append(key).append("=");
+			String value = hashMap.get(key);
+			if (!StringUtils.isEmpty(value)) {
+				buf.append(value);
+			}
+			if (index != sizeSets) {
+				buf.append("&");
+			}
+			index++;
+
+		}
+		return buf.toString();
+	}
+
 }
