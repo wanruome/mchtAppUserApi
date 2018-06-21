@@ -12,8 +12,8 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "TBL_REPAYMENT_BANKCARD")
-public class RepayMentBankCard {
+@Table(name = "TBL_REPAYMENT_BANKCARD_TEMP")
+public class RepayMentBankCardTemp {
 
 	@Id
 	@Column(name = "SEQUENCE_NO")
@@ -34,13 +34,15 @@ public class RepayMentBankCard {
 	private String responseCode;
 	@Column(name = "RESPONSE_REMARK")
 	private String responseRemark;
-	@Column(name = "BIND_STATUS")
-	private Integer bindStatus;
-	@Column(name = "SYNC_NUM")
-	private Integer syncNum;
 	@Column(name = "BANKCARD_TYPE")
 	private String bankCardType;
 	@Column(name = "BANKNAME")
 	private String bankName;
+	@Column(name = "STATUS")
+	private Integer status;
+	@Column(name = "CREATE_TIME")
+	private String createTime;
+	@Column(name = "UPDATE_TIME")
+	private String updateTime;
 
 }

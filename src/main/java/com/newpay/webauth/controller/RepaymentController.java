@@ -51,4 +51,15 @@ public class RepaymentController {
 		return repaymentService.doUnBindCard(repaymentUnBindCardReqDto);
 	}
 
+	@ApiOperation("解除银行卡绑定")
+	@PostMapping("/callBindCardResult")
+	public Object callBindCardResult(@Valid @RequestBody RepaymentUnBindCardReqDto repaymentUnBindCardReqDto,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+
+		return repaymentService.callBindCardResult(repaymentUnBindCardReqDto.getSequenceNo());
+	}
+
 }

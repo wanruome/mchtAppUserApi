@@ -12,4 +12,6 @@ public interface RepaymentService {
 	public Object doBindCard(RepaymentBindCardReqDto repaymentBindCardReqDto);
 
 	public Object doUnBindCard(RepaymentUnBindCardReqDto repaymentUnBindCardReqDto);
+
+	public Object callBindCardResult(String requestStr);
 }

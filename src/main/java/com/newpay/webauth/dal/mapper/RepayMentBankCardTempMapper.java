@@ -5,10 +5,10 @@
  */
 package com.newpay.webauth.dal.mapper;
 
-import com.newpay.webauth.dal.model.RepayMentBankCard;
+import com.newpay.webauth.dal.model.RepayMentBankCardTemp;
 
 import tk.mybatis.mapper.common.Mapper;
 
-public interface RepayMentBankCardMapper extends Mapper<RepayMentBankCard> {
+public interface RepayMentBankCardTempMapper extends Mapper<RepayMentBankCardTemp> {
 
 }
