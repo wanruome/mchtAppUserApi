@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.newpay.webauth.dal.request.repayment.RepaymentBindCardReqDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQrCodeCallDto;
+import com.newpay.webauth.dal.request.repayment.RepaymentQueryBindCardDto;
+import com.newpay.webauth.dal.request.repayment.RepaymentQueryCitysDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryOrdersDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentUnBindCardReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
@@ -92,6 +94,28 @@ public class RepaymentController {
 		}
 
 		return repaymentService.doQueryOrders(repaymentQueryOrdersDto);
+	}
+
+	@ApiOperation("查询绑定银行卡列表")
+	@PostMapping("/doQueryBindCards")
+	public Object doQueryBindCards(@Valid @RequestBody RepaymentQueryBindCardDto repaymentQueryBindCardDto,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+
+		return repaymentService.doQueryBindCards(repaymentQueryBindCardDto);
+	}
+
+	@ApiOperation("查询城市列表")
+	@PostMapping("/doQueryAllCitys")
+	public Object doQueryAllCitys(@Valid @RequestBody RepaymentQueryCitysDto repaymentQueryCitysDto,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+
+		return repaymentService.doQueryAllCitys(repaymentQueryCitysDto);
 	}
 
 }

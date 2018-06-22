@@ -5,8 +5,10 @@
  */
 package com.newpay.webauth.services.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +26,17 @@ import com.base.mchtApi.util.repayment.util.util.QrTools;
 import com.base.mchtApi.util.repayment.util.util.Strings;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.EncryptConfig;
+import com.newpay.webauth.config.util.StringMask;
 import com.newpay.webauth.dal.mapper.RepayMentBankCardMapper;
 import com.newpay.webauth.dal.mapper.RepayMentBankCardTempMapper;
+import com.newpay.webauth.dal.mapper.RepayMentCityMapper;
 import com.newpay.webauth.dal.model.RepayMentBankCard;
 import com.newpay.webauth.dal.model.RepayMentBankCardTemp;
+import com.newpay.webauth.dal.model.RepayMentCity;
 import com.newpay.webauth.dal.request.repayment.RepaymentBindCardReqDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQrCodeCallDto;
+import com.newpay.webauth.dal.request.repayment.RepaymentQueryBindCardDto;
+import com.newpay.webauth.dal.request.repayment.RepaymentQueryCitysDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryOrdersDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentUnBindCardReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
@@ -67,6 +74,8 @@ public class RepaymentServiceImpl implements RepaymentService {
 	RepayMentBankCardTempMapper repayMentBankCardTempMapper;
 	@Autowired
 	RepayMentBankCardMapper repayMentBankCardMapper;
+	@Autowired
+	RepayMentCityMapper repayMentCityMapper;
 
 	@Override
 	public Object doBindCard(RepaymentBindCardReqDto repaymentBindCardReqDto) {
@@ -80,7 +89,7 @@ public class RepaymentServiceImpl implements RepaymentService {
 			return ResultFactory.toNackPARAM();
 		}
 		RepayMentBankCard queryBankCard = new RepayMentBankCard();
-		queryBankCard.setBankcardNo(repaymentBindCardReqDto.getAccountNo());
+		queryBankCard.setBankCardNo(repaymentBindCardReqDto.getAccountNo());
 		queryBankCard.setUserId(repaymentBindCardReqDto.getUserId());
 		queryBankCard.setBindStatus(1);
 		List<RepayMentBankCard> resultLst = repayMentBankCardMapper.select(queryBankCard);
@@ -209,8 +218,8 @@ public class RepaymentServiceImpl implements RepaymentService {
 		String tmp = null;
 		Map<String, String> bean = new HashMap<String, String>();
 		try {
-			String cardNoTemp = EncryptConfig.decryptRepayment(resultBankCard.getBankcardNo());
-			String mobieTemp = EncryptConfig.decryptRepayment(resultBankCard.getBankcardMobile());
+			String cardNoTemp = EncryptConfig.decryptRepayment(resultBankCard.getBankCardNo());
+			String mobieTemp = EncryptConfig.decryptRepayment(resultBankCard.getBankCardMobile());
 			bean.put("serviceCode", "0800");
 			bean.put("processCode", "890004");
 			bean.put("merchantNo", RepayMentConstant.REPAYMENT_MACHNTNO);// 201706150034//102700000025
@@ -288,10 +297,10 @@ public class RepaymentServiceImpl implements RepaymentService {
 					: resAccountType;
 			RepayMentBankCard insertCard = new RepayMentBankCard();
 			insertCard.setUserId(resultBankCardTemp.getUserId());
-			insertCard.setBankcardNo(resultBankCardTemp.getBankcardNo());
-			insertCard.setBankcardMobile(resultBankCardTemp.getBankcardMobile());
-			insertCard.setBankcardIdcard(resultBankCardTemp.getBankcardIdcard());
-			insertCard.setBankcardName(resultBankCardTemp.getBankcardName());
+			insertCard.setBankCardNo(resultBankCardTemp.getBankcardNo());
+			insertCard.setBankCardMobile(resultBankCardTemp.getBankcardMobile());
+			insertCard.setBankCardIdcard(resultBankCardTemp.getBankcardIdcard());
+			insertCard.setBankCardName(resultBankCardTemp.getBankcardName());
 			insertCard.setArea(resultBankCardTemp.getArea());
 
 			insertCard.setBankName(realBankName);
@@ -351,7 +360,7 @@ public class RepaymentServiceImpl implements RepaymentService {
 			if (null == resultBankCard || resultBankCard.getBindStatus() != 1) {
 				return ResultFactory.toNackCORE("用户没有绑定该银行卡");
 			}
-			bankCardNo = EncryptConfig.decryptRepayment(resultBankCard.getBankcardNo());
+			bankCardNo = EncryptConfig.decryptRepayment(resultBankCard.getBankCardNo());
 		}
 		String tmp = null;
 		Map<String, String> bean = new HashMap<String, String>();
@@ -478,7 +487,7 @@ public class RepaymentServiceImpl implements RepaymentService {
 			bean.put("serviceCode", "0800");
 			bean.put("processCode", "890002");
 			bean.put("merchantNo", RepayMentConstant.REPAYMENT_MACHNTNO);// 201706150034//102700000025
-			bean.put("accountNo", EncryptConfig.decryptRepayment(resultBankCard.getBankcardNo()));
+			bean.put("accountNo", EncryptConfig.decryptRepayment(resultBankCard.getBankCardNo()));
 			bean.put("signMsg", ServiceTool.sign(bean, reqSignFields890002,
 					RepayMentConstant.REPAYMENT_MCHT_PRIVATEKEY_PATH, RepayMentConstant.REPAYMENT_MCHT_PRIVATEKEY_PWD));
 			String json = JSON.toJSONString(bean);
@@ -521,6 +530,95 @@ public class RepaymentServiceImpl implements RepaymentService {
 			else {
 				return ResultFactory.toNackREPAYMEN("上端数据获取错误", responseMap);
 			}
+		}
+	}
+
+	@Override
+	public Object doQueryBindCards(RepaymentQueryBindCardDto repaymentQueryBindCardDto) {
+		RepayMentBankCard queryCard = new RepayMentBankCard();
+		queryCard.setUserId(repaymentQueryBindCardDto.getUserId());
+		queryCard.setBindStatus(1);
+		List<RepayMentBankCard> listResult = repayMentBankCardMapper.select(queryCard);
+		JSONArray jsonArray = null;
+		if (null != listResult && listResult.size() > 0) {
+			jsonArray = new JSONArray();
+			for (RepayMentBankCard tmp : listResult) {
+				String cardNoTmp = EncryptConfig.decryptRepayment(tmp.getBankCardNo());
+				String cardMobieTmp = EncryptConfig.decryptRepayment(tmp.getBankCardMobile());
+				String cardNameTmp = EncryptConfig.decryptRepayment(tmp.getBankCardName());
+				String cardIdcardTmp = EncryptConfig.decryptRepayment(tmp.getBankCardIdcard());
+				String cardNoMasK = StringMask.getMaskBankNo(cardNoTmp);
+				String cardMobieMasK = StringMask.getMaskString(cardMobieTmp);
+				String cardNameMask = StringMask.getMaskString(cardNameTmp);
+				String cardIdcardMasK = StringMask.getMaskString(cardIdcardTmp);
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("cardIndex", tmp.getCardIndex());
+				jsonObject.put("accountNo", cardNoMasK);
+				jsonObject.put("mobileNo", cardMobieMasK);
+				jsonObject.put("idcardNo", cardIdcardMasK);
+				jsonObject.put("name", cardNameMask);
+				jsonObject.put("bankCardType", tmp.getBankCardType());
+				jsonObject.put("bankName;", tmp.getBankName());
+				jsonObject.put("area", tmp.getArea());
+				jsonArray.add(jsonObject);
+			}
+		}
+		return ResultFactory.toAck(jsonArray);
+	}
+
+	@Override
+	public Object doQueryAllCitys(RepaymentQueryCitysDto repaymentQueryCitysDto) {
+		boolean isQueryDb = true;
+		if (StringUtils.isEmpty(repaymentQueryCitysDto.getVersion())
+				|| StringUtils.isEmpty(AppConfig.RepayMentCityVersion())
+				|| !repaymentQueryCitysDto.getVersion().equals(AppConfig.RepayMentCityVersion())) {
+			isQueryDb = true;
+		}
+		else {
+			isQueryDb = false;
+		}
+		if (isQueryDb) {
+			List<RepayMentCity> lstResult = repayMentCityMapper.selectAllCitys();
+			if (StringUtils.isEmpty(repaymentQueryCitysDto.getFormat())
+					|| !"dict".equals(repaymentQueryCitysDto.getFormat().toLowerCase())) {
+				Map<String, List<String>> cityMap = new LinkedHashMap<String, List<String>>();
+				for (RepayMentCity tmp : lstResult) {
+					if (!cityMap.containsKey(tmp.getProvince())) {
+						cityMap.put(tmp.getProvince(), new ArrayList<String>());
+					}
+					cityMap.get(tmp.getProvince()).add(tmp.getCity());
+				}
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("cityData", cityMap);
+				jsonObject.put("version", StringUtils.nullStrToEmpty(AppConfig.RepayMentCityVersion()));
+				return ResultFactory.toAck(jsonObject);
+			}
+			else {
+
+				Map<String, List<String>> cityMap = new LinkedHashMap<String, List<String>>();
+				for (RepayMentCity tmp : lstResult) {
+					if (!cityMap.containsKey(tmp.getProvince())) {
+						cityMap.put(tmp.getProvince(), new ArrayList<String>());
+					}
+					cityMap.get(tmp.getProvince()).add(tmp.getCity());
+				}
+				JSONArray jsonArray = new JSONArray();
+				for (String key : cityMap.keySet()) {
+					JSONObject tmpJson = new JSONObject();
+					tmpJson.put("province", key);
+					tmpJson.put("city", cityMap.get(key));
+					jsonArray.add(tmpJson);
+				}
+				JSONObject jsonObject = new JSONObject();
+				jsonObject.put("cityData", jsonArray);
+				jsonObject.put("version", StringUtils.nullStrToEmpty(AppConfig.RepayMentCityVersion()));
+				return ResultFactory.toAck(jsonObject);
+			}
+		}
+		else {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("version", StringUtils.nullStrToEmpty(AppConfig.RepayMentCityVersion()));
+			return ResultFactory.toAck(jsonObject);
 		}
 	}
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.newpay.webauth.dal.mapper.RepayMentCityMapper">
+	<resultMap id="baseResultMap" type="com.newpay.webauth.dal.model.RepayMentCity">
+			<result property="id" column="TOKEN_ID" jdbcType="VARCHAR"/>
+			<result property="province" column="PROVINCE" jdbcType="VARCHAR"/>
+			<result property="city" column="CITY" jdbcType="VARCHAR"/>
+			<result property="code" column="CODE" jdbcType="NUMERIC"/>
+	</resultMap>
+	<select id="selectAllCitys" resultMap="baseResultMap">
+		select * from TBL_REPAYMENT_CITYS order by ID
+	</select>
+	
+	
+
+	
+</mapper>
+

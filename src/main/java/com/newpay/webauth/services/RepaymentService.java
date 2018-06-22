@@ -7,6 +7,8 @@ package com.newpay.webauth.services;
 
 import com.newpay.webauth.dal.request.repayment.RepaymentBindCardReqDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQrCodeCallDto;
+import com.newpay.webauth.dal.request.repayment.RepaymentQueryBindCardDto;
+import com.newpay.webauth.dal.request.repayment.RepaymentQueryCitysDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryOrdersDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentUnBindCardReqDto;
 
@@ -20,4 +22,8 @@ public interface RepaymentService {
 	public Object doCallQrcode(RepaymentQrCodeCallDto repaymentQrCodeCallDto);
 
 	public Object doQueryOrders(RepaymentQueryOrdersDto repaymentQueryOrdersDto);
+
+	public Object doQueryBindCards(RepaymentQueryBindCardDto repaymentQueryBindCardDto);
+
+	public Object doQueryAllCitys(RepaymentQueryCitysDto repaymentQueryCitysDto);
 }

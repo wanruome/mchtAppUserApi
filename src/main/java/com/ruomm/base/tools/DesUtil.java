@@ -194,6 +194,9 @@ public abstract class DesUtil {
 	}
 
 	public static String decryptString(String data, String key, String charsetName) {
+		if (null == data || data.length() <= 0) {
+			return data;
+		}
 		String dataDes = null;
 		try {
 			String charset = StringUtils.isEmpty(charsetName) ? "UTF-8" : charsetName;
@@ -237,6 +240,9 @@ public abstract class DesUtil {
 	}
 
 	public static String encryptString(String data, String key, String charsetName) {
+		if (null == data || data.length() <= 0) {
+			return data;
+		}
 		String dataDes = null;
 		try {
 			String charset = StringUtils.isEmpty(charsetName) ? "UTF-8" : charsetName;

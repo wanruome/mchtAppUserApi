@@ -22,13 +22,13 @@ public class RepayMentBankCard {
 	@Column(name = "USER_ID")
 	private String userId;
 	@Column(name = "BANKCARD_NO")
-	private String bankcardNo;
+	private String bankCardNo;
 	@Column(name = "BANKCARD_MOBILE")
-	private String bankcardMobile;
+	private String bankCardMobile;
 	@Column(name = "BANKCARD_IDCARD")
-	private String bankcardIdcard;
+	private String bankCardIdcard;
 	@Column(name = "BANKCARD_NAME")
-	private String bankcardName;
+	private String bankCardName;
 	@Column(name = "AREA")
 	private String area;
 	@Column(name = "RESPONESE_CODE")

@@ -107,6 +107,10 @@ public class AppConfig {
 		return ConfigUtil.getValBoolean("systemlog.async", true);
 	}
 
+	public static String RepayMentCityVersion() {
+		return ConfigUtil.getValString("repayment.cityversion");
+	}
+
 	public static final Integer OKHTTP_CONNECT_TIMEOUT = 5;
 	public static final Integer OKHTTP_WRITE_TIMEOUT = 15;
 	public static final Integer OKHTTP_READ_TIMEOUT = 15;
