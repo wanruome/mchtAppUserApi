@@ -35,6 +35,9 @@ public class MsgSendThread extends Thread {
 	}
 
 	public static boolean doMsgSend(String mobile, String content, String functionId) {
+		if (AppConfig.SmsServiceDebug()) {
+			return true;
+		}
 		try {
 			HashMap<String, String> map = new HashMap<>();
 			map.put("pszMobis", mobile);
@@ -44,8 +47,8 @@ public class MsgSendThread extends Thread {
 			map.put("functionId", functionId);
 			// String urlGet = OkHttpConfig.createRequestUrlForGet(AppConfig.SMS_SERVICE_URL, map);
 			RequestBody mRequestBody = OkHttpConfig.createRequestFormBody(map);
-			ResponseData responseData = new DataOKHttp().setUrl(AppConfig.SmsServicrUrl())
-					.setRequestBody(mRequestBody).doHttp(String.class);
+			ResponseData responseData = new DataOKHttp().setUrl(AppConfig.SmsServicrUrl()).setRequestBody(mRequestBody)
+					.doHttp(String.class);
 			if ("0000".equals(responseData.getResultObject())) {
 				return true;
 			}

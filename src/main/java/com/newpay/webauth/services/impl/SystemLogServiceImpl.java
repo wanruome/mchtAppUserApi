@@ -53,7 +53,7 @@ public class SystemLogServiceImpl implements SystemLogService {
 
 			Date date = new Date();
 			systemLog.setCreateDate(AppConfig.SDF_DB_DATE.format(date));
-			systemLog.setCreateTime(AppConfig.SDF_DB_VERSION.format(date));
+			systemLog.setCreateTime(AppConfig.SDF_DB_TIME.format(date));
 			String excuteTime = null;
 			try {
 				long timeExe = date.getTime() - sysLogBean.getStartTime();

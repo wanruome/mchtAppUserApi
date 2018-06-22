@@ -45,6 +45,8 @@ public class RepayMentBankCard {
 	private String createTime;
 	@Column(name = "UPDATE_TIME")
 	private String updateTime;
+	@Column(name = "CARD_FINGER")
+	private String cardFinger;
 	@Version
 	@Column(name = "VERSION")
 	private Integer version;

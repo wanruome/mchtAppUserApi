@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
@@ -35,6 +36,7 @@ import com.newpay.webauth.dal.model.MsgFunctionInfo;
 import com.newpay.webauth.dal.model.SystemLogFunction;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyMobie;
 import com.newpay.webauth.dal.response.ResultFactory;
+import com.ruomm.base.tools.BaseWebUtils;
 import com.ruomm.base.tools.FastJsonTools;
 import com.ruomm.base.tools.StringUtils;
 
@@ -69,8 +71,16 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		}
 		Map<String, String> jsonKeyMap = FastJsonTools.parseJsonKeyMap(jsonObject);
 		if (null == jsonKeyMap) {
-			throwException(response, ResultFactory.ERR_PARSE_REQUEST);
-			return false;
+			String uri = ((HttpServletRequest) request).getRequestURI();
+			String realUri = BaseWebUtils.getRealUri(uri);
+			if (realUri.endsWith("app/repayment/callBindCardResult")) {
+				log.debug("对于绑卡通知进行放行处理");
+				return true;
+			}
+			else {
+				throwException(response, ResultFactory.ERR_PARSE_REQUEST);
+				return false;
+			}
 
 		}
 		// 日志节点加入
@@ -120,7 +130,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			if (StringUtils.isEmpty(msgUUID)) {
 				throwException(response, ResultFactory.ERR_MSGCODE_INVALID, "请求参数错误");
 			}
-			String nowDateStr = AppConfig.SDF_DB_VERSION.format(new Date());
+			String nowDateStr = AppConfig.SDF_DB_TIME.format(new Date());
 			MsgAuthInfo msgAuthInfo = new MsgAuthInfo();
 			msgAuthInfo.setUuid(msgUUID);
 			msgAuthInfo.setFunctionId(msgFunctionInfo.getFunctionId());
@@ -228,7 +238,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			if (StringUtils.isEmpty(msgUUID)) {
 				throwException(response, ResultFactory.ERR_MSGCODE_INVALID, "请求参数错误");
 			}
-			String nowDateStr = AppConfig.SDF_DB_VERSION.format(new Date());
+			String nowDateStr = AppConfig.SDF_DB_TIME.format(new Date());
 			MsgAuthInfo msgAuthInfo = new MsgAuthInfo();
 			msgAuthInfo.setUuid(msgUUID);
 			msgAuthInfo.setFunctionId(msgFunctionInfo.getFunctionId());
@@ -336,7 +346,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		else if (!resultUserToken.getAppId().equals(appId)) {
 			return null;
 		}
-		String nowTimeStr = AppConfig.SDF_DB_VERSION.format(new Date());
+		String nowTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
 		if (nowTimeStr.compareTo(resultUserToken.getValidTime()) > 0) {
 			return null;
 		}

@@ -7,6 +7,8 @@ package com.newpay.webauth.dal.request.repayment;
 
 import javax.validation.constraints.NotEmpty;
 
+import org.hibernate.validator.constraints.Length;
+
 import lombok.Data;
 
 @Data
@@ -20,8 +22,10 @@ public class RepaymentBindCardReqDto {
 	@NotEmpty
 	private String signInfo;
 	@NotEmpty
+	@Length(min = 8, max = 20)
 	private String accountNo;
 	@NotEmpty
+	@Length(min = 8, max = 15)
 	private String mobileNo;
 	@NotEmpty
 	private String area;

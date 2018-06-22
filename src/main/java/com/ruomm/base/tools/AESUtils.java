@@ -1,7 +1,7 @@
 /**
- *	@copyright 盛炬支付-2016 
- * 	@author wanruome  
- * 	@create 2016年1月10日 下午5:15:20 
+ *	@copyright 盛炬支付-2016
+ * 	@author wanruome
+ * 	@create 2016年1月10日 下午5:15:20
  */
 package com.ruomm.base.tools;
 
@@ -15,7 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 /**
  * AES加密解密工具
- * 
+ *
  * @author Ruby
  */
 public class AESUtils {

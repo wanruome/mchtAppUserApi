@@ -8,6 +8,8 @@ package com.newpay.webauth.dal.request.userinfo;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
+import org.hibernate.validator.constraints.Length;
+
 import com.ruomm.base.tools.RegexUtil;
 
 import lombok.Data;
@@ -25,6 +27,7 @@ public class UserInfoModifyEmail {
 	@NotEmpty
 	private String msgVerifyCode;
 	@NotEmpty
+	@Length(min = 6, max = 64)
 	@Pattern(regexp = RegexUtil.EMAILS)
 	private String newEmail;
 }

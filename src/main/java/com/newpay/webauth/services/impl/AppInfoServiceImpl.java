@@ -72,7 +72,7 @@ public class AppInfoServiceImpl implements AppInfoService {
 			return ResultFactory.toNackPARAM();
 		}
 		loginAppInfo.setAppId(dbSeqServiceImpl.getLoginAppInfoNewPk());
-		loginAppInfo.setCreateTime(AppConfig.SDF_DB_VERSION.format(new Date()));
+		loginAppInfo.setCreateTime(AppConfig.SDF_DB_TIME.format(new Date()));
 		loginAppInfo.setStatus(2);
 		loginAppInfo.setVersion(1);
 		int dbResult = loginAppInfoMapper.insertSelective(loginAppInfo);

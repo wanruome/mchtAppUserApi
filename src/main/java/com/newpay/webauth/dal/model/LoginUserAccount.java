@@ -42,4 +42,19 @@ public class LoginUserAccount {
 	@Version
 	@Column(name = "VERSION")
 	private Integer version;
+
+	// public boolean parsePwdForSet(String pwd) {
+	// this.loginPwd = DesUtil.encryptString(pwd, EncrptyConfig.PWD_3DES);
+	// if (StringUtils.isEmpty(this.loginPwd)) {
+	// return false;
+	// }
+	// else {
+	// return true;
+	// }
+	// }
+	//
+	// public String parsePwdForGet() {
+	// String tmp = DesUtil.decryptString(this.loginPwd, EncrptyConfig.PWD_3DES);
+	// return tmp;
+	// }
 }

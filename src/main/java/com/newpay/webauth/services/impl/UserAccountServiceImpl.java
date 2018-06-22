@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.newpay.webauth.aop.SystemLogThreadLocal;
 import com.newpay.webauth.config.AppConfig;
+import com.newpay.webauth.config.EncryptConfig;
 import com.newpay.webauth.dal.core.TokenResponseParse;
 import com.newpay.webauth.dal.mapper.LoginAppInfoMapper;
 import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
@@ -92,7 +93,8 @@ public class UserAccountServiceImpl implements UserAccountService {
 		}
 		// 验证邮箱是否有效
 		if (!StringUtils.isEmpty(loginUserReqDto.getEmail())) {
-			if (!RegexUtil.doRegex(loginUserReqDto.getEmail(), RegexUtil.EMAILS)) {
+			if (!RegexUtil.doRegex(loginUserReqDto.getEmail(), RegexUtil.EMAILS)
+					|| StringUtils.getLengthByChar(loginUserReqDto.getEmail()) > 64) {
 				return ResultFactory.toNackPARAM();
 			}
 			if (VERIFY_IN_DB) {
@@ -120,12 +122,13 @@ public class UserAccountServiceImpl implements UserAccountService {
 			}
 			insertUserAccount.setLoginName(loginUserReqDto.getName());
 		}
+
 		insertUserAccount.setLoginPwd(loginUserReqDto.getPwd());
 		// 插入记录
 		insertUserAccount.setLoginId(dbSeqService.getLoginUserNewPK());
 		insertUserAccount.setVersion(1);
 		insertUserAccount.setStatus(1);
-		String nowTimeStr = AppConfig.SDF_DB_VERSION.format(new Date());
+		String nowTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
 		insertUserAccount.setRegisterTime(nowTimeStr);
 		insertUserAccount.setUpdateTime(nowTimeStr);
 		insertUserAccount.setPwdErrCount(0);
@@ -169,7 +172,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 			return ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "密码错误次数过多，请验证登录或找回密码");
 		}
 		// 验证密码错误次数
-		if (!resultLoginUserAccount.getLoginPwd().equals(userInfoLoginReqDto.getPwd())) {
+		if (!EncryptConfig.decryptPWD(resultLoginUserAccount.getLoginPwd()).equals(userInfoLoginReqDto.getPwd())) {
 			updateLoginUserPwdCount(userInfoLoginReqDto, resultLoginUserAccount, false);
 			return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, null);
 		}
@@ -261,13 +264,17 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (null == dbLoginUserAccount) {
 			return ResultFactory.toNackCORE("用户不存在");
 		}
-		if (!userInfoModifyPwd.getOldPwd().equals(dbLoginUserAccount.getLoginPwd())) {
+		if (!userInfoModifyPwd.getOldPwd().equals(EncryptConfig.decryptPWD(dbLoginUserAccount.getLoginPwd()))) {
 			return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, "旧的密码不正确");
+		}
+		String pwdEncrypt = EncryptConfig.encryptPWD(userInfoModifyPwd.getNewPwd());
+		if (StringUtils.isEmpty(pwdEncrypt)) {
+			ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null);
 		}
 		LoginUserAccount updateUserAccount = new LoginUserAccount();
 		updateUserAccount.setLoginId(userInfoModifyPwd.getUserId());
-		updateUserAccount.setLoginPwd(userInfoModifyPwd.getNewPwd());
-		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_VERSION.format(new Date()));
+		updateUserAccount.setLoginPwd(pwdEncrypt);
+		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
 		boolean dbFlag = updateLoginUserAccount(dbLoginUserAccount, updateUserAccount);
 		if (dbFlag) {
 			Map<String, String> mapResult = new HashMap<String, String>();
@@ -299,10 +306,14 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (dbLoginUserAccount.getStatus() != 1) {
 			return ResultFactory.toNackCORE("账户已停用");
 		}
-		String nowTimeStr = AppConfig.SDF_DB_VERSION.format(new Date());
+		String pwdEncrypt = EncryptConfig.encryptPWD(userInfoFindPwd.getNewPwd());
+		if (StringUtils.isEmpty(pwdEncrypt)) {
+			ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null);
+		}
+		String nowTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
 		LoginUserAccount updateUserAccount = new LoginUserAccount();
 		updateUserAccount.setLoginId(dbLoginUserAccount.getLoginId());
-		updateUserAccount.setLoginPwd(userInfoFindPwd.getNewPwd());
+		updateUserAccount.setLoginPwd(pwdEncrypt);
 		updateUserAccount.setLastAuthTime(nowTimeStr);
 		updateUserAccount.setLastAuthUuid(userInfoFindPwd.getUuid());
 		updateUserAccount.setPwdErrCount(0);
@@ -345,7 +356,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 		LoginUserAccount updateUserAccount = new LoginUserAccount();
 		updateUserAccount.setLoginId(userInfoModifyMobie.getUserId());
 		updateUserAccount.setLoginMobile(userInfoModifyMobie.getNewMobile());
-		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_VERSION.format(new Date()));
+		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
 		boolean dbFlag = updateLoginUserAccount(dbLoginUserAccount, updateUserAccount);
 		if (dbFlag) {
 			Map<String, String> mapResult = new HashMap<String, String>();
@@ -428,7 +439,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 		LoginUserAccount updateUserAccount = new LoginUserAccount();
 		updateUserAccount.setLoginId(userInfoModifyName.getUserId());
 		updateUserAccount.setLoginName(userInfoModifyName.getNewName());
-		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_VERSION.format(new Date()));
+		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
 		boolean dbFlag = updateLoginUserAccount(dbLoginUserAccount, updateUserAccount);
 		if (dbFlag) {
 			Map<String, String> mapResult = new HashMap<String, String>();
@@ -454,7 +465,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 			updateBean.setLoginId(dbLoginUserAccount.getLoginId());
 			updateBean.setPwdErrCount(0);
 			updateBean.setLastAuthUuid(userInfoLoginReqDto.getUuid());
-			updateBean.setLastAuthTime(AppConfig.SDF_DB_VERSION.format(new Date()));
+			updateBean.setLastAuthTime(AppConfig.SDF_DB_TIME.format(new Date()));
 			updateBean.setVersion(dbLoginUserAccount.getVersion());
 			int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
 			if (dbResult > 0) {

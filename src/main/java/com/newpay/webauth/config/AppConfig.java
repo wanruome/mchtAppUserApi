@@ -95,6 +95,10 @@ public class AppConfig {
 		return ConfigUtil.getValBoolean("sms.service.async", true);
 	}
 
+	public static Boolean SmsServiceDebug() {
+		return ConfigUtil.getValBoolean("sms.service.debug", false);
+	}
+
 	public static Boolean AppInfoModifyLimitOne() {
 		return ConfigUtil.getValBoolean("appinfo.modify.limitone", true);
 	}
@@ -113,7 +117,7 @@ public class AppConfig {
 	public static final String REQUEST_FIELD_TOKEN_ID = "tokenId";
 	public static final String REQUEST_FIELD_VERIFY_CODE = "msgVerifyCode";
 	public static SimpleDateFormat SDF_DB_DATE = new SimpleDateFormat("yyyyMMdd");
-	public static SimpleDateFormat SDF_DB_VERSION = new SimpleDateFormat("yyyyMMddHHmmss");
+	public static SimpleDateFormat SDF_DB_TIME = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	public static String PWD_ENCRYPT_NONE = "NONE";
 	public static String PWD_ENCRYPT_MD5 = "MD5";
 	public static String PWD_ENCRYPT_RSA = "RSA";

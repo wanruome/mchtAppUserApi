@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.newpay.webauth.config.EncryptConfig;
 import com.newpay.webauth.dal.core.PwdRequestParse;
 import com.newpay.webauth.dal.request.userinfo.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
@@ -26,11 +27,10 @@ import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.UserAccountService;
 import com.ruomm.base.tools.BaseWebUtils;
+import com.ruomm.base.tools.StringUtils;
 
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequestMapping("/app/userAccount")
 
@@ -55,7 +55,12 @@ public class UserAccoutController {
 		if (!pwdParse.isValid()) {
 			return pwdParse.getReturnResp();
 		}
-		userInfoRegister.setPwd(pwdParse.getPwdParse());
+		// 密码加密存储
+		String pwdEncrypt = EncryptConfig.encryptPWD(pwdParse.getPwdParse());
+		if (StringUtils.isEmpty(pwdEncrypt)) {
+			ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null);
+		}
+		userInfoRegister.setPwd(pwdEncrypt);
 		return userAccountService.doRegister(userInfoRegister);
 
 	}

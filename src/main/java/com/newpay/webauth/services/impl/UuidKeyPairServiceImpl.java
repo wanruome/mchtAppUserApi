@@ -67,14 +67,14 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 			insertBean.setKeyType(keyType);
 			insertBean.setPublicKey(keyPair[0]);
 			insertBean.setPrivateKey(keyPair[1]);
-			insertBean.setKeyVersion(AppConfig.SDF_DB_VERSION.format(new Date()));
+			insertBean.setKeyVersion(AppConfig.SDF_DB_TIME.format(new Date()));
 			insertBean.setVersion(1);
 			int dbResult = uuidKeyPairMapper.insert(insertBean);
 			returnKeyPair = dbResult > 0 ? insertBean : null;
 		}
 		else {
 			String keyVersion = resultUuidKeyPair.getKeyVersion();
-			boolean versionCacheFlag = TimeUtils.isCacheOk(keyVersion, AppConfig.SDF_DB_VERSION,
+			boolean versionCacheFlag = TimeUtils.isCacheOk(keyVersion, AppConfig.SDF_DB_TIME,
 					AppConfig.KeyPairPublicKeyGetSkipTime());
 			// long timeSkip = -1000l;
 			// try {
@@ -116,7 +116,7 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 				updateBean.setKeyType(keyType);
 				updateBean.setPublicKey(keyPair[0]);
 				updateBean.setPrivateKey(keyPair[1]);
-				updateBean.setKeyVersion(AppConfig.SDF_DB_VERSION.format(new Date()));
+				updateBean.setKeyVersion(AppConfig.SDF_DB_TIME.format(new Date()));
 				updateBean.setVersion(resultUuidKeyPair.getVersion());
 				int dbResult = uuidKeyPairMapper.updateByPrimaryKeySelective(updateBean);
 				returnKeyPair = dbResult > 0 ? updateBean : null;

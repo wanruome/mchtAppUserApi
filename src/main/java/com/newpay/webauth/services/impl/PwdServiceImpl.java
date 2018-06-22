@@ -162,7 +162,7 @@ public class PwdServiceImpl implements PwdService {
 			return null;
 		}
 		String keyVersion = resultUuidKeyPair.getKeyVersion();
-		boolean versionCacheFlag = TimeUtils.isCacheOk(keyVersion, AppConfig.SDF_DB_VERSION,
+		boolean versionCacheFlag = TimeUtils.isCacheOk(keyVersion, AppConfig.SDF_DB_TIME,
 				AppConfig.KeyPairPublicKeyValidTime());
 		if (!versionCacheFlag) {
 			return null;

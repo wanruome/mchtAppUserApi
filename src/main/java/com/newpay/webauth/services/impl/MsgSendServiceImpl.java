@@ -181,9 +181,9 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
 		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime(),
-				AppConfig.SDF_DB_VERSION);
+				AppConfig.SDF_DB_TIME);
 		String createDate = AppConfig.SDF_DB_DATE.format(nowDate);
-		String createTime = AppConfig.SDF_DB_VERSION.format(nowDate);
+		String createTime = AppConfig.SDF_DB_TIME.format(nowDate);
 		MsgSendInfo msgSendInfo = new MsgSendInfo();
 		msgSendInfo.setMsgId(msgId);
 		msgSendInfo.setUserId(msgSendReqDto.getUserId());
@@ -273,7 +273,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 			if (StringUtils.isEmpty(msgSendReqDto.getMsgToken())) {
 				return ResultFactory.toNackCORE("无权往其他账户上面发送验证码");
 			}
-			String nowDateStr = AppConfig.SDF_DB_VERSION.format(new Date());
+			String nowDateStr = AppConfig.SDF_DB_TIME.format(new Date());
 			MsgAuthInfo queryMsgAuthInfo = new MsgAuthInfo();
 			queryMsgAuthInfo.setUuid(msgUUID);
 			queryMsgAuthInfo.setMsgToken(msgSendReqDto.getMsgToken());
@@ -313,9 +313,9 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
 		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime(),
-				AppConfig.SDF_DB_VERSION);
+				AppConfig.SDF_DB_TIME);
 		String createDate = AppConfig.SDF_DB_DATE.format(nowDate);
-		String createTime = AppConfig.SDF_DB_VERSION.format(nowDate);
+		String createTime = AppConfig.SDF_DB_TIME.format(nowDate);
 		MsgSendInfo msgSendInfo = new MsgSendInfo();
 		msgSendInfo.setMsgId(msgId);
 		msgSendInfo.setUserId(msgSendReqDto.getUserId());
@@ -401,9 +401,9 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
 		String msgValidTime = TimeUtils.formatTime(nowDate.getTime() + AppConfig.VerfiyCodeValidTime(),
-				AppConfig.SDF_DB_VERSION);
+				AppConfig.SDF_DB_TIME);
 		String createDate = AppConfig.SDF_DB_DATE.format(nowDate);
-		String createTime = AppConfig.SDF_DB_VERSION.format(nowDate);
+		String createTime = AppConfig.SDF_DB_TIME.format(nowDate);
 		MsgSendInfo msgSendInfo = new MsgSendInfo();
 		msgSendInfo.setMsgId(msgId);
 		msgSendInfo.setUserId(msgSendReqDto.getUserId());
@@ -458,7 +458,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 	@Override
 	public Object doGetMsgToken(MsgTokenGetReqDto msgTokenGetReqDto) {
 		// TODO Auto-generated method stub
-		String nowTime = AppConfig.SDF_DB_VERSION.format(new Date());
+		String nowTime = AppConfig.SDF_DB_TIME.format(new Date());
 		MsgAuthInfo queryAuthInfo = new MsgAuthInfo();
 		queryAuthInfo.setUuid(msgTokenGetReqDto.getUserId());
 		queryAuthInfo.setFunctionId(msgTokenGetReqDto.getMsgFunction());
