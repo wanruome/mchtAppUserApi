@@ -43,7 +43,6 @@ public class UserAccoutController {
 	@ApiOperation("用户注册")
 	@PostMapping("/doRegister")
 	public Object doRegister(@Valid @RequestBody UserInfoRegisterReqDto userInfoRegister, BindingResult bindingResult) {
-		;
 		if (null == bindingResult || bindingResult.hasErrors()) {
 			return ResultFactory.toNackPARAM();
 		}

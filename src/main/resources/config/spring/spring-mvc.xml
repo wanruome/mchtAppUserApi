@@ -47,10 +47,9 @@
 				class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
 				<property name="supportedMediaTypes">
 					<list>
-						<value>text/html;charset=UTF-8</value>
+						<!-- <value>text/html;charset=UTF-8</value> -->
 						<value>text/plain;charset=UTF-8</value>
 						<value>application/json</value>
-
 					</list>
 				</property>
 				<property name="features">

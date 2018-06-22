@@ -78,8 +78,7 @@ public class CustomExceptionResolver implements HandlerExceptionResolver {
 			}
 		}
 		// 解析JSON请求
-		if (isApp && (contentType.contains("application/json") || contentType.contains("")
-				|| contentType.contains("text/plain"))) {
+		if (isApp && (contentType.contains("application/json") || contentType.contains("text/plain"))) {
 
 			JSONObject baseResponse = ResultFactory.toNack(ResultFactory.ERR_UNKNOWN, null);
 			Writer writer = null;

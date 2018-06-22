@@ -144,7 +144,6 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 			jsonObject.put("uuid", returnKeyPair.getUuid());
 			jsonObject.put("publicKey", tmpString);
 			jsonObject.put("keyVersion", returnKeyPair.getKeyVersion());
-			jsonObject.put("version", returnKeyPair.getVersion());
 			return ResultFactory.toAck(jsonObject);
 		}
 

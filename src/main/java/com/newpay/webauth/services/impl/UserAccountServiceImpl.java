@@ -243,7 +243,6 @@ public class UserAccountServiceImpl implements UserAccountService {
 		resultData.put("token", tokenResponseParse.getLoginUserToken().getToken());
 		resultData.put("validTime", tokenResponseParse.getLoginUserToken().getValidTime());
 		resultData.put("termType", tokenResponseParse.getLoginUserToken().getTermType() + "");
-		resultData.put("version", tokenResponseParse.getLoginUserToken().getVersion() + "");
 		resultData.put("userId", resultLoginUserAccount.getLoginId());
 		resultData.put("appId", tokenResponseParse.getLoginUserToken().getAppId());
 		resultData.put("email", resultLoginUserAccount.getLoginEmail());
