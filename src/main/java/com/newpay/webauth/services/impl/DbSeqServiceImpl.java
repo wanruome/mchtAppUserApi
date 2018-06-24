@@ -117,4 +117,9 @@ public class DbSeqServiceImpl implements DbSeqService {
 		return getSeqByName("RM_BANKCARD_NEW_PK", null, 100000);
 	}
 
+	@Override
+	public String getFeedBackNewPk() {
+		return getSeqByName("FEED_BACK_NEW_PK", null, 100000);
+	}
+
 }

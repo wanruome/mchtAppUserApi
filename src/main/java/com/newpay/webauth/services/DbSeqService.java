@@ -19,4 +19,6 @@ public interface DbSeqService {
 	public String getRMBankCardTempNewPK();
 
 	public String getRMBankCardNewPK();
+
+	public String getFeedBackNewPk();
 }
