@@ -390,4 +390,22 @@ public class TimeUtils {
 			return true;
 		}
 	}
+
+	public static boolean isCacheOk(String cacheTime, long nowTime, SimpleDateFormat sdf, long validTime) {
+		long timeSkip = -1000l;
+		try {
+			timeSkip = Math.abs(nowTime - sdf.parse(cacheTime).getTime());
+		}
+		catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			timeSkip = -1000l;
+		}
+		if (timeSkip > validTime || timeSkip < 0) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
 }

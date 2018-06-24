@@ -7,6 +7,7 @@ package com.newpay.webauth.services;
 
 import com.newpay.webauth.dal.request.userinfo.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
+import com.newpay.webauth.dal.request.userinfo.UserInfoLogout;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyEmail;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyMobie;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyName;
@@ -27,4 +28,6 @@ public interface UserAccountService {
 	public Object doModifyEmail(UserInfoModifyEmail userInfoModifyEmail);
 
 	public Object doModifyName(UserInfoModifyName userInfoModifyName);
+
+	public Object doLogout(UserInfoLogout userInfoLogout);
 }

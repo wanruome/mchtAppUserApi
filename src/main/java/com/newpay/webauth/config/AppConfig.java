@@ -7,6 +7,8 @@ package com.newpay.webauth.config;
 
 import java.text.SimpleDateFormat;
 
+import com.ruomm.base.tools.TimeUtils;
+
 public class AppConfig {
 	public static String CompanyName() {
 		return ConfigUtil.getValString("CompanyName", "浙江盛炬支付");
@@ -36,8 +38,20 @@ public class AppConfig {
 		return ConfigUtil.getValInteger("user.pwd_min_rule");
 	}
 
-	public static Integer UserPwdErrLimit() {
-		return ConfigUtil.getValInteger("user.pwd_err_limit");
+	public static Integer UserPwdErrCountLimit() {
+		return ConfigUtil.getValInteger("user.pwd_err_count_limit", 5);
+	}
+
+	public static Long UserPwdErrTimeLimit() {
+		return ConfigUtil.getValLongTime("user.pwd_err_time_limit", TimeUtils.VALUE_DAYTimeMillis / 4);
+	}
+
+	public static Integer PayInfoPayPwdErrCountLimit() {
+		return ConfigUtil.getValInteger("payinfo.paypwd_err_count_limit", 5);
+	}
+
+	public static Long PayInfoPayPwdErrTimeLimit() {
+		return ConfigUtil.getValLongTime("payinfo.paypwd_err_time_limit", TimeUtils.VALUE_DAYTimeMillis / 4);
 	}
 
 	public static Long UserUuidAuthTime() {

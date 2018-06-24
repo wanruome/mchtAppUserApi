@@ -16,8 +16,8 @@ public class RepayMentConstant {
 	public static String REPAYMENT_MACHNTNO = null;
 	public static String REPAYMENT_YUFU_URL = null;
 	public static String REPAYMENT_YUFU_NOTIRY_URL = null;
-	public static Long REPAYMENT_NOPWDAMOUNT = 50000L;
-	public static Long REPAYMENT_LIMITAMOUNT = 500000L;
+	public static Integer REPAYMENT_NOPWDAMOUNT = 50000;
+	public static Integer REPAYMENT_LIMITAMOUNT = 500000;
 	public static Boolean REPAYMENT_AUTOUNLOCK = false;
 	public static Boolean REPAYMENT_AUTOUNLOCK_ASYNC = false;
 	public static Boolean REPAYMENT_QRCODE_TEST = null;
@@ -34,8 +34,8 @@ public class RepayMentConstant {
 		REPAYMENT_MACHNTNO = null;
 		REPAYMENT_YUFU_URL = null;
 		REPAYMENT_YUFU_NOTIRY_URL = null;
-		REPAYMENT_NOPWDAMOUNT = 50000L;
-		REPAYMENT_LIMITAMOUNT = 500000L;
+		REPAYMENT_NOPWDAMOUNT = 50000;
+		REPAYMENT_LIMITAMOUNT = 500000;
 		REPAYMENT_AUTOUNLOCK = null;
 		REPAYMENT_AUTOUNLOCK_ASYNC = null;
 		REPAYMENT_QRCODE_TEST = null;
@@ -52,8 +52,8 @@ public class RepayMentConstant {
 			REPAYMENT_MACHNTNO = configProperty.getValString("repayment.machantNo");
 			REPAYMENT_YUFU_URL = configProperty.getValString("repayment.yufuUrl");
 			REPAYMENT_YUFU_NOTIRY_URL = configProperty.getValString("repayment.yufuNotifyUrl");
-			REPAYMENT_NOPWDAMOUNT = configProperty.getValLong("repayment.noPwdAmount", 500 * 100L);
-			REPAYMENT_LIMITAMOUNT = configProperty.getValLong("repayment.limitAmount", 5000 * 100L);
+			REPAYMENT_NOPWDAMOUNT = configProperty.getValInteger("repayment.noPwdAmount", 500 * 100);
+			REPAYMENT_LIMITAMOUNT = configProperty.getValInteger("repayment.limitAmount", 5000 * 100);
 			REPAYMENT_AUTOUNLOCK = configProperty.getValBoolean("repayment.autounlock", false);
 			REPAYMENT_AUTOUNLOCK_ASYNC = configProperty.getValBoolean("repayment.autounlock.async", false);
 			REPAYMENT_QRCODE_TEST = configProperty.getValBoolean("repayment.qrcodetest", false);

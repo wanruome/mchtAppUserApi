@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.dal.core.PwdRequestParse;
+import com.newpay.webauth.dal.core.PwdRuleParse;
 import com.newpay.webauth.dal.mapper.UuidKeyPairMapper;
 import com.newpay.webauth.dal.model.UuidKeyPair;
 import com.newpay.webauth.dal.response.ResultFactory;
@@ -197,10 +198,39 @@ public class PwdServiceImpl implements PwdService {
 		}
 	}
 
+	@Override
+	public PwdRuleParse parseAccountPwdRule(String pwd) {
+		PwdRuleParse ruleParse = new PwdRuleParse();
+		if (isPwdRuleOK(pwd, AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(), AppConfig.UserPwdMinRule(),
+				true)) {
+			ruleParse.setValid(true);
+		}
+		else {
+			ruleParse.setValid(false);
+			String msg = parsePwdRuleToString(AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(),
+					AppConfig.UserPwdMinRule());
+			ruleParse.setReturnResp(ResultFactory.toNackPARAM(msg));
+		}
+		return ruleParse;
+	}
+
+	@Override
+	public PwdRuleParse parsePayPwdRule(String pwd) {
+		PwdRuleParse ruleParse = new PwdRuleParse();
+		if (StringUtils.getLength(pwd) < 6) {
+			ruleParse.setValid(false);
+			ruleParse.setReturnResp(ResultFactory.toNackPARAM("支付密码简单了"));
+		}
+		else {
+			ruleParse.setValid(true);
+		}
+		return ruleParse;
+	}
+
 	/***
 	 * 解析请求的密码，返回解析是否成功和解析好的密码字段
 	 */
-	@Override
+	// @Override
 	public PwdRequestParse parseRequsetPwd(String pwdRequest, String pwdEncrypt, String pwdUuid, boolean isRuleCheck) {
 		// TODO Auto-generated method stub
 		PwdRequestParse pwdParse = new PwdRequestParse();
@@ -289,6 +319,88 @@ public class PwdServiceImpl implements PwdService {
 					return pwdParse;
 
 				}
+			}
+		}
+		else {
+			pwdParse.setValid(false);
+			pwdParse.setReturnResp(ResultFactory.toNackPARAM());
+			return pwdParse;
+		}
+	}
+
+	@Override
+	public PwdRequestParse parseRequsetPwd(String pwdRequest, String pwdEncrypt, String pwdUuid) {
+		// TODO Auto-generated method stub
+		PwdRequestParse pwdParse = new PwdRequestParse();
+		pwdParse.setValid(false);
+		pwdParse.setPwdParse(null);
+		pwdParse.setPwdClear(null);
+		pwdParse.setReturnResp(null);
+		if (StringUtils.isBlank(pwdRequest) || StringUtils.isEmpty(pwdUuid)) {
+			pwdParse.setValid(false);
+			pwdParse.setReturnResp(ResultFactory.toNackPARAM());
+			return pwdParse;
+		}
+		if (!isEncryptTypeOk(pwdEncrypt)) {
+			pwdParse.setValid(false);
+			pwdParse.setReturnResp(ResultFactory.toNackPARAM());
+			return pwdParse;
+		}
+		if (pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_NONE)) {
+			String pwdResult = EncryptUtils.encodingMD5(EncryptUtils.encodingMD5(pwdRequest));
+			pwdParse.setPwdParse(pwdResult);
+			pwdParse.setPwdClear(pwdRequest);
+			pwdParse.setValid(true);
+			pwdParse.setReturnResp(null);
+			return pwdParse;
+		}
+		else if (pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_MD5)) {
+			if (pwdRequest.length() != 32) {
+				pwdParse.setValid(false);
+				pwdParse.setReturnResp(ResultFactory.toNackPARAM());
+				return pwdParse;
+			}
+			String pwdResult = EncryptUtils.encodingMD5(pwdRequest);
+			pwdParse.setPwdParse(pwdResult);
+			pwdParse.setPwdClear(null);
+			pwdParse.setValid(true);
+			pwdParse.setReturnResp(null);
+			return pwdParse;
+		}
+		else if (pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_RSAMD5) || pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_3DESMD5)) {
+			String pwd = getPwdByRsaOr3Des(pwdRequest, pwdEncrypt, pwdUuid);
+			if (StringUtils.isBlank(pwd)) {
+				pwdParse.setValid(false);
+				pwdParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null));
+				return pwdParse;
+			}
+			else if (pwd.length() != 32) {
+				pwdParse.setValid(false);
+				pwdParse.setReturnResp(ResultFactory.toNackPARAM());
+				return pwdParse;
+			}
+			else {
+				String pwdResult = EncryptUtils.encodingMD5(pwd);
+				pwdParse.setPwdParse(pwdResult);
+				pwdParse.setValid(true);
+				return pwdParse;
+			}
+		}
+		else if (pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_RSA) || pwdEncrypt.equals(AppConfig.PWD_ENCRYPT_3DES)) {
+			String pwd = getPwdByRsaOr3Des(pwdRequest, pwdEncrypt, pwdUuid);
+			if (StringUtils.isBlank(pwd)) {
+				pwdParse.setValid(false);
+				pwdParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null));
+				return pwdParse;
+			}
+			else {
+				String pwdResult = EncryptUtils.encodingMD5(EncryptUtils.encodingMD5(pwd));
+				pwdParse.setPwdParse(pwdResult);
+				pwdParse.setPwdClear(pwd);
+				pwdParse.setValid(true);
+				pwdParse.setReturnResp(null);
+				return pwdParse;
+
 			}
 		}
 		else {

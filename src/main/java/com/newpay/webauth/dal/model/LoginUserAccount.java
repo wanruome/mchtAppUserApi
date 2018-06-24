@@ -30,6 +30,8 @@ public class LoginUserAccount {
 	private Integer status;
 	@Column(name = "PWD_ERR_COUNT")
 	private Integer pwdErrCount;
+	@Column(name = "PWD_ERR_TIME")
+	private String pwdErrTime;
 	@Column(name = "LAST_AUTH_UUID")
 	private String lastAuthUuid;
 	@Column(name = "LAST_AUTH_TIME")

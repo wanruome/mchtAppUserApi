@@ -5,12 +5,16 @@
  */
 package com.newpay.webauth.services;
 
+import com.alibaba.fastjson.JSONObject;
 import com.newpay.webauth.dal.core.TokenResponseParse;
 import com.newpay.webauth.dal.model.LoginAppInfo;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
+import com.newpay.webauth.dal.request.userinfo.UserInfoLogout;
 
 public interface SecureTokenService {
 	public TokenResponseParse createTokenForLogin(UserInfoLoginReqDto userInfoLoginReqDto,
 			LoginUserAccount resultLoginUserAccount, LoginAppInfo resultLoginAppInfo);
+
+	public JSONObject disableTokenForLogout(UserInfoLogout userInfoLogout);
 }

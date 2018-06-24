@@ -21,6 +21,7 @@ import com.newpay.webauth.dal.model.LoginAppInfo;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
+import com.newpay.webauth.dal.request.userinfo.UserInfoLogout;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.DbSeqService;
 import com.newpay.webauth.services.SecureTokenService;
@@ -261,6 +262,31 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 			}
 
 		}
+	}
+
+	@Override
+	public JSONObject disableTokenForLogout(UserInfoLogout userInfoLogout) {
+		// TODO Auto-generated method stub
+		LoginUserToken queryToken = new LoginUserToken();
+		// queryToken.setUserId(userInfoLogout.getUserId());
+		// queryToken.setAppId(userInfoLogout.getAppId());
+		queryToken.setTokenId(userInfoLogout.getTokenId());
+		LoginUserToken resultToken = loginUserTokenMapper.selectOne(queryToken);
+		if (null == resultToken || resultToken.getLoginStatus() != 1) {
+			return ResultFactory.toNackCORE("用户已经退出了");
+		}
+		else {
+			queryToken.setLoginStatus(0);
+			queryToken.setVersion(resultToken.getVersion());
+			int dbResult = loginUserTokenMapper.updateByPrimaryKeySelective(queryToken);
+			if (dbResult > 0) {
+				return ResultFactory.toAck(null);
+			}
+			else {
+				return ResultFactory.toNackDB();
+			}
+		}
+
 	}
 
 }

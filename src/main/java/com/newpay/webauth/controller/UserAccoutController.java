@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.newpay.webauth.config.EncryptConfig;
 import com.newpay.webauth.dal.core.PwdRequestParse;
+import com.newpay.webauth.dal.core.PwdRuleParse;
 import com.newpay.webauth.dal.request.userinfo.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
+import com.newpay.webauth.dal.request.userinfo.UserInfoLogout;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyEmail;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyMobie;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyName;
@@ -50,9 +52,13 @@ public class UserAccoutController {
 		// userInfoRegister.setPwdEncrypt(AppConfig.UserPwdEncryptDefault);
 		// }
 		PwdRequestParse pwdParse = pwdService.parseRequsetPwd(userInfoRegister.getPwd(),
-				userInfoRegister.getPwdEncrypt(), userInfoRegister.getUuid(), true);
+				userInfoRegister.getPwdEncrypt(), userInfoRegister.getUuid());
 		if (!pwdParse.isValid()) {
 			return pwdParse.getReturnResp();
+		}
+		PwdRuleParse pwdRuleParse = pwdService.parseAccountPwdRule(pwdParse.getPwdClear());
+		if (!pwdRuleParse.isValid()) {
+			return pwdRuleParse.getReturnResp();
 		}
 		// 密码加密存储
 		String pwdEncrypt = EncryptConfig.encryptPWD(pwdParse.getPwdParse());
@@ -73,7 +79,7 @@ public class UserAccoutController {
 		BaseWebUtils.getClassesRoot();
 		BaseWebUtils.getWwwroot();
 		PwdRequestParse pwdParse = pwdService.parseRequsetPwd(userInfoLoginReqDto.getPwd(),
-				userInfoLoginReqDto.getPwdEncrypt(), userInfoLoginReqDto.getUuid(), false);
+				userInfoLoginReqDto.getPwdEncrypt(), userInfoLoginReqDto.getUuid());
 		if (!pwdParse.isValid()) {
 			return pwdParse.getReturnResp();
 		}
@@ -88,10 +94,9 @@ public class UserAccoutController {
 			return ResultFactory.toNackPARAM();
 		}
 		PwdRequestParse oldPwdParse = pwdService.parseRequsetPwd(userInfoModifyPwd.getOldPwd(),
-				userInfoModifyPwd.getOldPwdEncrypt(), userInfoModifyPwd.getUuid(), false);
+				userInfoModifyPwd.getOldPwdEncrypt(), userInfoModifyPwd.getUuid());
 		PwdRequestParse newPwdParse = pwdService.parseRequsetPwd(userInfoModifyPwd.getNewPwd(),
-				userInfoModifyPwd.getNewPwdEncrypt(), userInfoModifyPwd.getUuid(), true);
-
+				userInfoModifyPwd.getNewPwdEncrypt(), userInfoModifyPwd.getUuid());
 		if (!newPwdParse.isValid()) {
 			return newPwdParse.getReturnResp();
 		}
@@ -101,9 +106,12 @@ public class UserAccoutController {
 		if (newPwdParse.getPwdParse().equals(oldPwdParse.getPwdParse())) {
 			return ResultFactory.toNackCORE("新密码不能和旧密码一致");
 		}
+		PwdRuleParse pwdRuleParse = pwdService.parseAccountPwdRule(newPwdParse.getPwdClear());
+		if (!pwdRuleParse.isValid()) {
+			return pwdRuleParse.getReturnResp();
+		}
 		userInfoModifyPwd.setNewPwd(newPwdParse.getPwdParse());
 		userInfoModifyPwd.setOldPwd(oldPwdParse.getPwdParse());
-		// 验证密码解密
 		return userAccountService.doModifyPwd(userInfoModifyPwd);
 	}
 
@@ -113,12 +121,16 @@ public class UserAccoutController {
 		if (null == bindingResult || bindingResult.hasErrors()) {
 			return ResultFactory.toNackPARAM();
 		}
-		PwdRequestParse oldPwdParse = pwdService.parseRequsetPwd(userInfoFindPwd.getNewPwd(),
-				userInfoFindPwd.getNewPwdEncrypt(), userInfoFindPwd.getUuid(), true);
-		if (!oldPwdParse.isValid()) {
-			return oldPwdParse.getReturnResp();
+		PwdRequestParse newPwdParse = pwdService.parseRequsetPwd(userInfoFindPwd.getNewPwd(),
+				userInfoFindPwd.getNewPwdEncrypt(), userInfoFindPwd.getUuid());
+		if (!newPwdParse.isValid()) {
+			return newPwdParse.getReturnResp();
 		}
-		userInfoFindPwd.setNewPwd(oldPwdParse.getPwdParse());
+		PwdRuleParse pwdRuleParse = pwdService.parseAccountPwdRule(newPwdParse.getPwdClear());
+		if (!pwdRuleParse.isValid()) {
+			return pwdRuleParse.getReturnResp();
+		}
+		userInfoFindPwd.setNewPwd(newPwdParse.getPwdParse());
 		return userAccountService.doFindPwd(userInfoFindPwd);
 	}
 
@@ -149,6 +161,16 @@ public class UserAccoutController {
 			return ResultFactory.toNackPARAM();
 		}
 		return userAccountService.doModifyName(userInfoModifyName);
+	}
+
+	@ApiOperation("用户登出")
+	@PostMapping("/doLogout")
+	public Object doLogout(@Valid @RequestBody UserInfoLogout userInfoLogout, BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+		return userAccountService.doLogout(userInfoLogout);
+
 	}
 
 }

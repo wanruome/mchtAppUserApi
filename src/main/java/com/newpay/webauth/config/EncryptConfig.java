@@ -46,13 +46,13 @@ public class EncryptConfig {
 		return DesUtil.decryptString(dataEncrypt, getPwd3DES());
 	}
 
-	// public static String encryptPayPwd(String data) {
-	// return DesUtil.encryptString(data, getPayPwd3DES());
-	// }
-	//
-	// public static String decryptPayPwd(String dataEncrypt) {
-	// return DesUtil.decryptString(dataEncrypt, getPayPwd3DES());
-	// }
+	public static String encryptPayPwd(String data) {
+		return DesUtil.encryptString(data, getPayPwd3DES());
+	}
+
+	public static String decryptPayPwd(String dataEncrypt) {
+		return DesUtil.decryptString(dataEncrypt, getPayPwd3DES());
+	}
 
 	public static String encryptRepayment(String data) {
 		return DesUtil.encryptString(data, getRepayMent3DES());

@@ -6,6 +6,7 @@
 package com.newpay.webauth.services.impl;
 
 import java.security.PublicKey;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.newpay.webauth.aop.SystemLogThreadLocal;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.EncryptConfig;
+import com.newpay.webauth.dal.core.PwdErrParse;
 import com.newpay.webauth.dal.core.TokenResponseParse;
 import com.newpay.webauth.dal.mapper.LoginAppInfoMapper;
 import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
@@ -28,6 +30,7 @@ import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.request.userinfo.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
+import com.newpay.webauth.dal.request.userinfo.UserInfoLogout;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyEmail;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyMobie;
 import com.newpay.webauth.dal.request.userinfo.UserInfoModifyName;
@@ -45,6 +48,7 @@ import com.ruomm.base.tools.EncryptUtils;
 import com.ruomm.base.tools.RSAUtils;
 import com.ruomm.base.tools.RegexUtil;
 import com.ruomm.base.tools.StringUtils;
+import com.ruomm.base.tools.TimeUtils;
 
 @Component
 @Service
@@ -58,6 +62,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 	@Autowired
 	LoginUserAccountMapper loginUserAccountMapper;
 	boolean VERIFY_IN_DB = true;
+	private static final String PWD_ERR_NONE = "none";
 
 	@Override
 	public Object doRegister(UserInfoRegisterReqDto loginUserReqDto) {
@@ -167,20 +172,28 @@ public class UserAccountServiceImpl implements UserAccountService {
 			return ResultFactory.toNackCORE("用户不存在");
 		}
 		SystemLogThreadLocal.setUserId(resultLoginUserAccount.getLoginId());
-		if (null != resultLoginUserAccount.getPwdErrCount() && AppConfig.UserPwdErrLimit() > 0
-				&& resultLoginUserAccount.getPwdErrCount() > 5) {
-			return ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "密码错误次数过多，请验证登录或找回密码");
-		}
-		// 验证密码错误次数
-		if (!EncryptConfig.decryptPWD(resultLoginUserAccount.getLoginPwd()).equals(userInfoLoginReqDto.getPwd())) {
-			updateLoginUserPwdCount(userInfoLoginReqDto, resultLoginUserAccount, false);
-			return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, null);
-		}
-		else {
-			boolean flagPwdCount = updateLoginUserPwdCount(userInfoLoginReqDto, resultLoginUserAccount, true);
-			if (!flagPwdCount) {
-				return ResultFactory.toNackDB();
-			}
+		// if (null != resultLoginUserAccount.getPwdErrCount() && AppConfig.UserPwdErrLimit() > 0
+		// && resultLoginUserAccount.getPwdErrCount() > 5) {
+		// return ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "密码错误次数过多，请验证登录或找回密码");
+		// }
+		// // 验证密码错误次数
+		// if
+		// (!EncryptConfig.decryptPWD(resultLoginUserAccount.getLoginPwd()).equals(userInfoLoginReqDto.getPwd()))
+		// {
+		// updateLoginUserPwdCount(userInfoLoginReqDto, resultLoginUserAccount, false);
+		// return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, null);
+		// }
+		// else {
+		// boolean flagPwdCount = updateLoginUserPwdCount(userInfoLoginReqDto,
+		// resultLoginUserAccount, true);
+		// if (!flagPwdCount) {
+		// return ResultFactory.toNackDB();
+		// }
+		// }
+		PwdErrParse pwdErrParse = parseErrCount(resultLoginUserAccount, userInfoLoginReqDto.getPwd(),
+				userInfoLoginReqDto.getUuid(), "密码");
+		if (!pwdErrParse.isValid()) {
+			return pwdErrParse.getReturnResp();
 		}
 
 		LoginAppInfo queryLoginAppinfo = new LoginAppInfo();
@@ -263,9 +276,16 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (null == dbLoginUserAccount) {
 			return ResultFactory.toNackCORE("用户不存在");
 		}
-		if (!userInfoModifyPwd.getOldPwd().equals(EncryptConfig.decryptPWD(dbLoginUserAccount.getLoginPwd()))) {
-			return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, "旧的密码不正确");
+		PwdErrParse pwdErrParse = parseErrCount(dbLoginUserAccount, userInfoModifyPwd.getOldPwd(),
+				userInfoModifyPwd.getUuid(), "旧密码");
+		if (!pwdErrParse.isValid()) {
+			return pwdErrParse.getReturnResp();
 		}
+		// if
+		// (!userInfoModifyPwd.getOldPwd().equals(EncryptConfig.decryptPWD(dbLoginUserAccount.getLoginPwd())))
+		// {
+		// return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, "旧的密码不正确");
+		// }
 		String pwdEncrypt = EncryptConfig.encryptPWD(userInfoModifyPwd.getNewPwd());
 		if (StringUtils.isEmpty(pwdEncrypt)) {
 			ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null);
@@ -316,6 +336,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 		updateUserAccount.setLastAuthTime(nowTimeStr);
 		updateUserAccount.setLastAuthUuid(userInfoFindPwd.getUuid());
 		updateUserAccount.setPwdErrCount(0);
+		updateUserAccount.setPwdErrTime(PWD_ERR_NONE);
 		updateUserAccount.setUpdateTime(nowTimeStr);
 		boolean dbFlag = updateLoginUserAccount(dbLoginUserAccount, updateUserAccount);
 		if (dbFlag) {
@@ -450,6 +471,12 @@ public class UserAccountServiceImpl implements UserAccountService {
 		}
 	}
 
+	@Override
+	public Object doLogout(UserInfoLogout userInfoLogout) {
+		return secureTokenService.disableTokenForLogout(userInfoLogout);
+
+	}
+
 	public LoginUserAccount queryLoginUserAccount(String userId) {
 		LoginUserAccount queryUserAccount = new LoginUserAccount();
 		queryUserAccount.setLoginId(userId);
@@ -457,38 +484,141 @@ public class UserAccountServiceImpl implements UserAccountService {
 		return loginUserAccountMapper.selectByPrimaryKey(queryUserAccount);
 	}
 
-	public boolean updateLoginUserPwdCount(UserInfoLoginReqDto userInfoLoginReqDto, LoginUserAccount dbLoginUserAccount,
-			boolean isSuccess) {
-		if (isSuccess) {
-			LoginUserAccount updateBean = new LoginUserAccount();
-			updateBean.setLoginId(dbLoginUserAccount.getLoginId());
-			updateBean.setPwdErrCount(0);
-			updateBean.setLastAuthUuid(userInfoLoginReqDto.getUuid());
-			updateBean.setLastAuthTime(AppConfig.SDF_DB_TIME.format(new Date()));
-			updateBean.setVersion(dbLoginUserAccount.getVersion());
-			int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
-			if (dbResult > 0) {
-				dbLoginUserAccount.setVersion(dbLoginUserAccount.getVersion() + 1);
-			}
-			return dbResult > 0 ? true : false;
+	// public boolean updateLoginUserPwdCount(UserInfoLoginReqDto userInfoLoginReqDto,
+	// LoginUserAccount dbLoginUserAccount,
+	// boolean isSuccess) {
+	// if (isSuccess) {
+	// LoginUserAccount updateBean = new LoginUserAccount();
+	// updateBean.setLoginId(dbLoginUserAccount.getLoginId());
+	// updateBean.setPwdErrCount(0);
+	// updateBean.setLastAuthUuid(userInfoLoginReqDto.getUuid());
+	// updateBean.setLastAuthTime(AppConfig.SDF_DB_TIME.format(new Date()));
+	// updateBean.setVersion(dbLoginUserAccount.getVersion());
+	// int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
+	// if (dbResult > 0) {
+	// dbLoginUserAccount.setVersion(dbLoginUserAccount.getVersion() + 1);
+	// }
+	// return dbResult > 0 ? true : false;
+	// }
+	// else {
+	// LoginUserAccount updateBean = new LoginUserAccount();
+	// updateBean.setLoginId(dbLoginUserAccount.getLoginId());
+	// updateBean.setPwdErrCount(
+	// null == dbLoginUserAccount.getPwdErrCount() ? 1 : dbLoginUserAccount.getPwdErrCount() + 1);
+	//
+	// updateBean.setVersion(dbLoginUserAccount.getVersion());
+	// int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
+	// if (dbResult > 0) {
+	// dbLoginUserAccount.setVersion(dbLoginUserAccount.getVersion() + 1);
+	// }
+	// return dbResult > 0 ? true : false;
+	// }
+	//
+	// }
+
+	private PwdErrParse parseErrCount(LoginUserAccount resultLoginUserAccount, String pwd, String uuid, String pwdTag) {
+		String pwdRemark = StringUtils.isEmpty(pwdTag) ? "密码" : pwdTag;
+		Date date = new Date();
+		PwdErrParse pwdErrParse = new PwdErrParse();
+		boolean isCacheOK = false;
+		if (StringUtils.isEmpty(resultLoginUserAccount.getPwdErrTime())
+				|| PWD_ERR_NONE.equals(resultLoginUserAccount.getPwdErrTime())) {
+			isCacheOK = false;
 		}
 		else {
-			LoginUserAccount updateBean = new LoginUserAccount();
-			updateBean.setLoginId(dbLoginUserAccount.getLoginId());
-			updateBean.setPwdErrCount(
-					null == dbLoginUserAccount.getPwdErrCount() ? 1 : dbLoginUserAccount.getPwdErrCount() + 1);
+			isCacheOK = TimeUtils.isCacheOk(resultLoginUserAccount.getPwdErrTime(), date.getTime(),
+					AppConfig.SDF_DB_TIME, AppConfig.UserPwdErrTimeLimit());
+		}
+		if (isCacheOK && null != resultLoginUserAccount.getPwdErrCount()
+				&& resultLoginUserAccount.getPwdErrCount() >= AppConfig.UserPwdErrCountLimit()) {
+			// pwdErrParse.setReturnResp(
+			// ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, pwdRemark +
+			// "错误次数过多，请稍后重试或找回密码"));
+			long time = AppConfig.UserPwdErrTimeLimit();
+			try {
+				time = AppConfig.UserPwdErrTimeLimit() - date.getTime()
+						+ AppConfig.SDF_DB_TIME.parse(resultLoginUserAccount.getPwdErrTime()).getTime();
+			}
+			catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				time = AppConfig.UserPwdErrTimeLimit();
+			}
+			pwdErrParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE,
+					pwdRemark + "错误次数过多，" + parseErrTimeRespnseToString(time)));
 
-			updateBean.setVersion(dbLoginUserAccount.getVersion());
+			return pwdErrParse;
+		}
+		// 验证密码错误次数
+		if (!EncryptConfig.decryptPWD(resultLoginUserAccount.getLoginPwd()).equals(pwd)) {
+			if (isCacheOK) {
+				int pwdErrCount = null == resultLoginUserAccount.getPwdErrCount() ? 1
+						: resultLoginUserAccount.getPwdErrCount() + 1;
+				pwdErrParse.setValid(false);
+				pwdErrParse.setPwdErrCount(pwdErrCount);
+				pwdErrParse.setPwdErrTime(null);
+			}
+			else {
+				pwdErrParse.setValid(false);
+				pwdErrParse.setPwdErrCount(1);
+				pwdErrParse.setPwdErrTime(AppConfig.SDF_DB_TIME.format(date));
+			}
+			LoginUserAccount updateBean = new LoginUserAccount();
+			updateBean.setLoginId(resultLoginUserAccount.getLoginId());
+			updateBean.setPwdErrCount(pwdErrParse.getPwdErrCount());
+			updateBean.setPwdErrTime(pwdErrParse.getPwdErrTime());
+			updateBean.setVersion(resultLoginUserAccount.getVersion());
 			int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
 			if (dbResult > 0) {
-				dbLoginUserAccount.setVersion(dbLoginUserAccount.getVersion() + 1);
+				resultLoginUserAccount.setVersion(resultLoginUserAccount.getVersion() + 1);
+				pwdErrParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, pwdRemark + "错误"));
 			}
-			return dbResult > 0 ? true : false;
+			else {
+				pwdErrParse.setReturnResp(ResultFactory.toNackDB());
+			}
+		}
+		else {
+			pwdErrParse.setPwdErrCount(0);
+			pwdErrParse.setPwdErrTime(AppConfig.SDF_DB_TIME.format(date));
+			LoginUserAccount updateBean = new LoginUserAccount();
+			updateBean.setLoginId(resultLoginUserAccount.getLoginId());
+			updateBean.setPwdErrCount(0);
+			updateBean.setPwdErrTime(PWD_ERR_NONE);
+			updateBean.setLastAuthUuid(uuid);
+			updateBean.setLastAuthTime(pwdErrParse.getPwdErrTime());
+			updateBean.setVersion(resultLoginUserAccount.getVersion());
+			int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
+			if (dbResult > 0) {
+				resultLoginUserAccount.setVersion(resultLoginUserAccount.getVersion() + 1);
+				pwdErrParse.setValid(true);
+				return pwdErrParse;
+			}
+			else {
+				pwdErrParse.setValid(false);
+				pwdErrParse.setReturnResp(ResultFactory.toNackDB());
+			}
 		}
 
+		return pwdErrParse;
 	}
 
-	public boolean updateLoginUserAccount(LoginUserAccount dbLoginUserAccount, LoginUserAccount updateUserAccount) {
+	public static String parseErrTimeRespnseToString(long errTime) {
+		if (errTime <= 1000l * 60) {
+			return "1分钟后重试或找回密码";
+		}
+		long timeMin = errTime / (1000l * 60);
+		if (timeMin < 60l) {
+			return timeMin + "分钟后重试或找回密码";
+		}
+		else if (timeMin % 60 < 30) {
+			return timeMin / 60 + "后重试或找回密码";
+		}
+		else {
+			return (timeMin / 60 + 1) + "后重试或找回密码";
+		}
+	}
+
+	private boolean updateLoginUserAccount(LoginUserAccount dbLoginUserAccount, LoginUserAccount updateUserAccount) {
 
 		updateUserAccount.setVersion(dbLoginUserAccount.getVersion());
 		int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateUserAccount);
