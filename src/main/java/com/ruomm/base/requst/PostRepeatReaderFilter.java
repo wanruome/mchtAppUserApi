@@ -23,8 +23,11 @@ public class PostRepeatReaderFilter implements Filter {
 
 		ServletRequest requestWrapper = null;
 		if (request instanceof HttpServletRequest) {
+			String contentType = request.getContentType();
+			System.out.println(contentType);
 			HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-			if ("POST".equals(httpServletRequest.getMethod().toUpperCase())) {
+			if ("POST".equals(httpServletRequest.getMethod().toUpperCase()) && null != contentType
+					&& (contentType.contains("application/json") || contentType.contains("text/plain"))) {
 				requestWrapper = new PostRepeatReaderRequestWrapper((HttpServletRequest) request);
 			}
 		}

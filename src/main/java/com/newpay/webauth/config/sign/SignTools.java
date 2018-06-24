@@ -31,6 +31,17 @@ public class SignTools {
 		return signInfo.equals(EncryptUtils.encodingMD5(value));
 	}
 
+	public static boolean verifySign(Map<String, String> maps, String signInfo, String token) {
+		if (null == maps || null == signInfo) {
+			return false;
+		}
+
+		// jsonObject.remove(AppConfig.REQUEST_FIELD_SIGN_INFO);
+		maps.remove(AppConfig.REQUEST_FIELD_SIGN_INFO);
+		String value = getKeyString(maps) + "token=" + token;
+		return signInfo.equals(EncryptUtils.encodingMD5(value));
+	}
+
 	public static Map<String, String> parseJsonToMap(JSONObject jsonObject) {
 		Map<String, String> hashMap = new HashMap<>();
 		for (String key : jsonObject.keySet()) {

@@ -7,6 +7,7 @@ package com.newpay.webauth.authcenter.shiro.filter;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
@@ -61,13 +62,21 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 
 	private boolean processAccessDeniedFastJson(ServletRequest request, ServletResponse response) throws IOException {
 		JSONObject jsonObject = null;
-		try {
-			jsonObject = JSON.parseObject(IOUtils.toString(request.getInputStream(), "UTF-8"));
-			log.info("请求信息:" + jsonObject.toJSONString());
+		String contentType = request.getContentType();
+		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+		if ("POST".equals(httpServletRequest.getMethod().toUpperCase()) && null != contentType
+				&& (contentType.contains("application/json") || contentType.contains("text/plain"))) {
+			try {
+				jsonObject = JSON.parseObject(IOUtils.toString(request.getInputStream(), "UTF-8"));
+				log.info("请求信息:" + jsonObject.toJSONString());
+			}
+			catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
 		}
-		catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+		else {
+			jsonObject = null;
 		}
 		Map<String, String> jsonKeyMap = FastJsonTools.parseJsonKeyMap(jsonObject);
 		if (null == jsonKeyMap) {
@@ -75,6 +84,33 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			String realUri = BaseWebUtils.getRealUri(uri);
 			if (realUri.endsWith("app/repayment/callBindCardResult")) {
 				log.debug("对于绑卡通知进行放行处理");
+				return true;
+			}
+			else if (realUri.endsWith("app/fileCore/uploadFile")) {
+				log.debug("对于上传文件放行");
+				String userId = httpServletRequest.getHeader("userId");
+				String appId = httpServletRequest.getHeader("appId");
+				String tokenId = httpServletRequest.getHeader("tokenId");
+				String signInfo = httpServletRequest.getHeader("signInfo");
+				String uuid = httpServletRequest.getHeader("uuid");
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("userId", userId);
+				map.put("appId", appId);
+				map.put("tokenId", tokenId);
+				map.put("uuid", uuid);
+				String token = getTokenById(tokenId, userId, appId);
+				if (SignTools.verifySign(map, signInfo, token)) {
+					log.debug("签名验证成功");
+					return true;
+				}
+				{
+					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					log.debug("签名验证失败");
+					return false;
+				}
+			}
+			else if (realUri.endsWith("app/fileCore/getFile")) {
+				log.debug("对于下载文件放行");
 				return true;
 			}
 			else {

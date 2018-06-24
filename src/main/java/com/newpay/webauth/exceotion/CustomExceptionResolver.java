@@ -103,6 +103,17 @@ public class CustomExceptionResolver implements HandlerExceptionResolver {
 			}
 			return null;
 		}
+		else if (isApp) {
+			try {
+				response.sendError(404);
+				return null;
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		}
 		else {
 			// 向前台返回错误信息
 			ModelAndView modelAndView = new ModelAndView();

@@ -258,6 +258,10 @@ public class FileUtils {
 		return flag;
 	}
 
+	public static boolean writeFile(String filePath, InputStream stream) {
+		return writeFile(filePath != null ? new File(filePath) : null, stream, false);
+	}
+
 	public static boolean writeFile(String filePath, InputStream stream, boolean append) {
 		return writeFile(filePath != null ? new File(filePath) : null, stream, append);
 	}

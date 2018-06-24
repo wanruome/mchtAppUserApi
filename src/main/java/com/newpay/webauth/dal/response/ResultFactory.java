@@ -27,7 +27,7 @@ public class ResultFactory {
 	public static String ERR_DB = "e403";
 	public static String ERR_PWD_WRONG = "e404";
 	public static String ERR_PWD_PARSE = "e405";
-
+	public static String ERR_FILE_NOFIND = "e406";
 	public static String ERR_NEED_VERIFYCODE = "e409";
 	public static String ERR_PARSE_REQUEST = "e410";
 	public static String ERR_TOKEN_INVALID = "e411";

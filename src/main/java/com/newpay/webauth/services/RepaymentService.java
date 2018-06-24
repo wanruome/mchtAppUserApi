@@ -5,6 +5,7 @@
  */
 package com.newpay.webauth.services;
 
+import com.alibaba.fastjson.JSONObject;
 import com.newpay.webauth.dal.request.repayment.RepaymentBindCardReqDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQrCodeCallDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryBindCardDto;
@@ -17,7 +18,7 @@ public interface RepaymentService {
 
 	public Object doUnBindCard(RepaymentUnBindCardReqDto repaymentUnBindCardReqDto);
 
-	public Object callBindCardResult(String requestStr);
+	public JSONObject callBindCardResult(String requestStr);
 
 	public Object doCallQrcode(RepaymentQrCodeCallDto repaymentQrCodeCallDto);
 

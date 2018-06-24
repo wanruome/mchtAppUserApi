@@ -8,6 +8,7 @@ package com.newpay.webauth.controller;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.IOUtils;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alibaba.fastjson.JSONObject;
 import com.newpay.webauth.dal.request.repayment.RepaymentBindCardReqDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQrCodeCallDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryBindCardDto;
@@ -59,9 +61,9 @@ public class RepaymentController {
 		return repaymentService.doUnBindCard(repaymentUnBindCardReqDto);
 	}
 
-	@ApiOperation("解除银行卡绑定")
+	@ApiOperation("银联绑定银行卡反馈信息处理")
 	@PostMapping("/callBindCardResult")
-	public Object callBindCardResult(HttpServletRequest request) {
+	public Object callBindCardResult(HttpServletRequest request, HttpServletResponse response) {
 		String requestStr = null;
 		try {
 			requestStr = IOUtils.toString(request.getInputStream(), "UTF-8");
@@ -71,7 +73,21 @@ public class RepaymentController {
 			e.printStackTrace();
 			requestStr = null;
 		}
-		return repaymentService.callBindCardResult(requestStr);
+		JSONObject resultObject = repaymentService.callBindCardResult(requestStr);
+		if (ResultFactory.isAck(resultObject)) {
+			return "OK";
+		}
+		else {
+			try {
+				response.sendError(404);
+			}
+			catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+		// return repaymentService.callBindCardResult(requestStr);
 	}
 
 	@ApiOperation("申请二维码")

@@ -270,7 +270,7 @@ public class RepaymentServiceImpl implements RepaymentService {
 	}
 
 	@Override
-	public Object callBindCardResult(String requestStr) {
+	public JSONObject callBindCardResult(String requestStr) {
 		// TODO Auto-generated method stub
 		log.info("syncREQ：" + requestStr);
 		JSONObject responseMap = null;
