@@ -98,7 +98,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 				try {
 					long timeLastValidTime = AppConfig.SDF_DB_TIME.parse(resultUUIDToken.getValidTime()).getTime();
 					long timeSkip = new Date().getTime() - timeLastValidTime;
-					if (timeSkip < 0 || timeSkip > AppConfig.UserToken_DeleteTime()) {
+					if (timeSkip > AppConfig.UserToken_DeleteTime()) {
 						tokenResponseParse.setReturnResp(jsonResult);
 						return tokenResponseParse;
 					}

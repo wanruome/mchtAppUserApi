@@ -143,6 +143,8 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 		updateBean.setUserId(payInfoPayModifyPayPwdReqDto.getUserId());
 		updateBean.setPayPwd(pwdEncrypt);
 		updateBean.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
+		updateBean.setPwdErrCount(0);
+		updateBean.setPwdErrTime(pwdErrParse.getPwdErrTime());
 		boolean dbFlag = updateRepaymentPayInfo(resultPayInfo, updateBean);
 		if (dbFlag) {
 			Map<String, String> mapResult = new HashMap<String, String>();
@@ -284,23 +286,25 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 			}
 		}
 		else {
+			pwdErrParse.setValid(true);
 			pwdErrParse.setPwdErrCount(0);
-			pwdErrParse.setPwdErrTime(AppConfig.SDF_DB_TIME.format(date));
-			RepayMentPayInfo updateBean = new RepayMentPayInfo();
-			updateBean.setUserId(resultPayInfo.getUserId());
-			updateBean.setPwdErrCount(0);
-			updateBean.setPwdErrTime(PWD_ERR_NONE);
-			updateBean.setVersion(resultPayInfo.getVersion());
-			int dbResult = repayMentPayInfoMapper.updateByPrimaryKeySelective(updateBean);
-			if (dbResult > 0) {
-				resultPayInfo.setVersion(resultPayInfo.getVersion() + 1);
-				pwdErrParse.setValid(true);
-				return pwdErrParse;
-			}
-			else {
-				pwdErrParse.setValid(false);
-				pwdErrParse.setReturnResp(ResultFactory.toNackDB());
-			}
+			pwdErrParse.setPwdErrTime(PWD_ERR_NONE);
+			pwdErrParse.setLastAuthTime(AppConfig.SDF_DB_TIME.format(date));
+			// RepayMentPayInfo updateBean = new RepayMentPayInfo();
+			// updateBean.setUserId(resultPayInfo.getUserId());
+			// updateBean.setPwdErrCount(0);
+			// updateBean.setPwdErrTime(PWD_ERR_NONE);
+			// updateBean.setVersion(resultPayInfo.getVersion());
+			// int dbResult = repayMentPayInfoMapper.updateByPrimaryKeySelective(updateBean);
+			// if (dbResult > 0) {
+			// resultPayInfo.setVersion(resultPayInfo.getVersion() + 1);
+			// pwdErrParse.setValid(true);
+			// return pwdErrParse;
+			// }
+			// else {
+			// pwdErrParse.setValid(false);
+			// pwdErrParse.setReturnResp(ResultFactory.toNackDB());
+			// }
 		}
 
 		return pwdErrParse;

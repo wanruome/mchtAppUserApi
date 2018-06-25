@@ -209,20 +209,24 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (null == resultLoginAppinfo || resultLoginAppinfo.getStatus() != 1) {
 			return ResultFactory.toNackCORE("无法登陆，应用授权失败");
 		}
-		// String token = EncryptUtils.encodingMD5(TokenUtil.generateToken());
-		// UsernamePasswordToken shiroToken = new
-		// UsernamePasswordToken(resultLoginUserAccount.getLoginId(),
-		// TokenUtil.generateToken(), false);
-		// SecurityUtils.getSubject().login(shiroToken);
-		// TokenResponseParse tokenResponseParse = userTokenInfoService.createTokenForLogin(
-		// resultLoginUserAccount.getLoginId(), userInfoLoginReqDto.getAppId(),
-		// userInfoLoginReqDto.getTermType(),
-		// userInfoLoginReqDto.getUuid());
 		TokenResponseParse tokenResponseParse = secureTokenService.createTokenForLogin(userInfoLoginReqDto,
 				resultLoginUserAccount, resultLoginAppinfo);
 		if (!tokenResponseParse.isValid()) {
 			return tokenResponseParse.getReturnResp();
 		}
+		// 更新设备授权信息
+		LoginUserAccount updateBean = new LoginUserAccount();
+		updateBean.setLoginId(resultLoginUserAccount.getLoginId());
+		updateBean.setPwdErrCount(0);
+		updateBean.setPwdErrTime(pwdErrParse.getPwdErrTime());
+		updateBean.setLastAuthUuid(userInfoLoginReqDto.getUuid());
+		updateBean.setLastAuthTime(pwdErrParse.getLastAuthTime());
+		updateBean.setVersion(resultLoginUserAccount.getVersion());
+		int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
+		if (dbResult <= 0) {
+			return ResultFactory.toNackDB();
+		}
+		resultLoginUserAccount.setVersion(resultLoginUserAccount.getVersion() + 1);
 		// 发送数据到第三方服务器上
 		if (!StringUtils.isEmpty(resultLoginAppinfo.getNotifyUrl())
 				&& resultLoginAppinfo.getNotifyUrl().toLowerCase().startsWith("http")) {
@@ -304,6 +308,10 @@ public class UserAccountServiceImpl implements UserAccountService {
 		updateUserAccount.setLoginId(userInfoModifyPwd.getUserId());
 		updateUserAccount.setLoginPwd(pwdEncrypt);
 		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
+		updateUserAccount.setPwdErrCount(0);
+		updateUserAccount.setPwdErrTime(pwdErrParse.getPwdErrTime());
+		updateUserAccount.setLastAuthTime(pwdErrParse.getLastAuthTime());
+		updateUserAccount.setLastAuthUuid(userInfoModifyPwd.getUuid());
 		boolean dbFlag = updateLoginUserAccount(dbLoginUserAccount, updateUserAccount);
 		if (dbFlag) {
 			Map<String, String> mapResult = new HashMap<String, String>();
@@ -343,10 +351,10 @@ public class UserAccountServiceImpl implements UserAccountService {
 		LoginUserAccount updateUserAccount = new LoginUserAccount();
 		updateUserAccount.setLoginId(dbLoginUserAccount.getLoginId());
 		updateUserAccount.setLoginPwd(pwdEncrypt);
-		updateUserAccount.setLastAuthTime(nowTimeStr);
-		updateUserAccount.setLastAuthUuid(userInfoFindPwd.getUuid());
 		updateUserAccount.setPwdErrCount(0);
 		updateUserAccount.setPwdErrTime(PWD_ERR_NONE);
+		updateUserAccount.setLastAuthTime(nowTimeStr);
+		updateUserAccount.setLastAuthUuid(userInfoFindPwd.getUuid());
 		updateUserAccount.setUpdateTime(nowTimeStr);
 		boolean dbFlag = updateLoginUserAccount(dbLoginUserAccount, updateUserAccount);
 		if (dbFlag) {
@@ -615,6 +623,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 				e.printStackTrace();
 				time = AppConfig.UserPwdErrTimeLimit();
 			}
+			pwdErrParse.setValid(false);
 			pwdErrParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE,
 					pwdRemark + "错误次数过多，" + parseErrTimeRespnseToString(time)));
 
@@ -649,25 +658,30 @@ public class UserAccountServiceImpl implements UserAccountService {
 			}
 		}
 		else {
+			pwdErrParse.setValid(true);
 			pwdErrParse.setPwdErrCount(0);
-			pwdErrParse.setPwdErrTime(AppConfig.SDF_DB_TIME.format(date));
-			LoginUserAccount updateBean = new LoginUserAccount();
-			updateBean.setLoginId(resultLoginUserAccount.getLoginId());
-			updateBean.setPwdErrCount(0);
-			updateBean.setPwdErrTime(PWD_ERR_NONE);
-			updateBean.setLastAuthUuid(uuid);
-			updateBean.setLastAuthTime(pwdErrParse.getPwdErrTime());
-			updateBean.setVersion(resultLoginUserAccount.getVersion());
-			int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
-			if (dbResult > 0) {
-				resultLoginUserAccount.setVersion(resultLoginUserAccount.getVersion() + 1);
-				pwdErrParse.setValid(true);
-				return pwdErrParse;
-			}
-			else {
-				pwdErrParse.setValid(false);
-				pwdErrParse.setReturnResp(ResultFactory.toNackDB());
-			}
+			pwdErrParse.setPwdErrTime(PWD_ERR_NONE);
+			pwdErrParse.setLastAuthTime(AppConfig.SDF_DB_TIME.format(date));
+			return pwdErrParse;
+			// pwdErrParse.setPwdErrCount(0);
+			// pwdErrParse.setPwdErrTime(AppConfig.SDF_DB_TIME.format(date));
+			// LoginUserAccount updateBean = new LoginUserAccount();
+			// updateBean.setLoginId(resultLoginUserAccount.getLoginId());
+			// updateBean.setPwdErrCount(0);
+			// updateBean.setPwdErrTime(PWD_ERR_NONE);
+			// updateBean.setLastAuthUuid(uuid);
+			// updateBean.setLastAuthTime(pwdErrParse.getPwdErrTime());
+			// updateBean.setVersion(resultLoginUserAccount.getVersion());
+			// int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateBean);
+			// if (dbResult > 0) {
+			// resultLoginUserAccount.setVersion(resultLoginUserAccount.getVersion() + 1);
+			// pwdErrParse.setValid(true);
+			// return pwdErrParse;
+			// }
+			// else {
+			// pwdErrParse.setValid(false);
+			// pwdErrParse.setReturnResp(ResultFactory.toNackDB());
+			// }
 		}
 
 		return pwdErrParse;

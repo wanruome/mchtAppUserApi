@@ -14,5 +14,6 @@ public class PwdErrParse {
 	private boolean isValid;
 	private Integer pwdErrCount;
 	private String pwdErrTime;
+	private String lastAuthTime;
 	private JSONObject returnResp;
 }
