@@ -30,10 +30,12 @@ import com.newpay.webauth.dal.core.SysLogBean;
 import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
 import com.newpay.webauth.dal.mapper.LoginUserTokenMapper;
 import com.newpay.webauth.dal.mapper.MsgAuthInfoMapper;
+import com.newpay.webauth.dal.mapper.SignInfoManagerMapper;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.model.MsgAuthInfo;
 import com.newpay.webauth.dal.model.MsgFunctionInfo;
+import com.newpay.webauth.dal.model.SignInfoManager;
 import com.newpay.webauth.dal.model.SystemLogFunction;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
 import com.newpay.webauth.dal.response.ResultFactory;
@@ -51,6 +53,8 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	LoginUserAccountMapper loginUserAccountMapper;
 	@Autowired
 	MsgAuthInfoMapper msgAuthInfoMapper;
+	@Autowired
+	SignInfoManagerMapper signInfoManagerMapper;
 
 	@Override
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws IOException {
@@ -232,6 +236,46 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			String userId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_USER_ID);
 			String appId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_APP_ID);
 			String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
+
+			if (AppConfig.RequestTimeStampOffSet() >= AppConfig.REQUEST_TIMESTAMP_MIN_OFFSET) {
+				long dateTimeNow = new Date().getTime();
+				String timeStamp = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap,
+						AppConfig.REQUEST_FIELD_TIMESTAMP);
+				if (StringUtils.isEmpty(timeStamp)) {
+					throwException(response, ResultFactory.ERR_PRARM, "必须上送timeStamp字段");
+					return false;
+				}
+				Long reqTimeSkip = 0l;
+				try {
+					reqTimeSkip = Math.abs(Long.parseLong(timeStamp) - dateTimeNow);
+				}
+				catch (Exception e) {
+					reqTimeSkip = -1l;
+				}
+				if (reqTimeSkip < 0 || reqTimeSkip > AppConfig.RequestTimeStampOffSet()) {
+					throwException(response, ResultFactory.ERR_CLIENT_TIME);
+					log.debug("终端时间不正确");
+					return false;
+				}
+				//
+				SignInfoManager signInfoManager = new SignInfoManager();
+				signInfoManager.setSignInfoValue(signInfo);
+				signInfoManager.setCreateTime(dateTimeNow);
+				int dbResult = 0;
+				try {
+					dbResult = signInfoManagerMapper.insert(signInfoManager);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					dbResult = 0;
+				}
+				if (dbResult <= 0) {
+					throwException(response, ResultFactory.ERR_PRARM, "请求信息不可以重复。");
+					log.debug("终端时间不正确");
+					return false;
+				}
+
+			}
 			String token = getTokenById(tokenId, userId, appId);
 			if (SignTools.verifySign(jsonObject, token)) {
 				log.debug("签名验证成功");

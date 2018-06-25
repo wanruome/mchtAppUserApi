@@ -134,6 +134,10 @@ public class AppConfig {
 		return ConfigUtil.getValString("filecore.upload_file_path");
 	}
 
+	public static Long RequestTimeStampOffSet() {
+		return ConfigUtil.getValLongTime("request.timestamp_offset", 0l);
+	}
+
 	public static final Integer OKHTTP_CONNECT_TIMEOUT = 5;
 	public static final Integer OKHTTP_WRITE_TIMEOUT = 15;
 	public static final Integer OKHTTP_READ_TIMEOUT = 15;
@@ -142,7 +146,9 @@ public class AppConfig {
 	public static final String REQUEST_FIELD_UUID = "uuid";
 	public static final String REQUEST_FIELD_USER_ID = "userId";
 	public static final String REQUEST_FIELD_TOKEN_ID = "tokenId";
+	public static final String REQUEST_FIELD_TIMESTAMP = "timeStamp";
 	public static final String REQUEST_FIELD_VERIFY_CODE = "msgVerifyCode";
+	public static final long REQUEST_TIMESTAMP_MIN_OFFSET = 60000l;
 	public static SimpleDateFormat SDF_DB_DATE = new SimpleDateFormat("yyyyMMdd");
 	public static SimpleDateFormat SDF_DB_TIME = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	public static String PWD_ENCRYPT_NONE = "NONE";

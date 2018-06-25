@@ -32,6 +32,8 @@ public class ResultFactory {
 	public static String ERR_PARSE_REQUEST = "e410";
 	public static String ERR_TOKEN_INVALID = "e411";
 	public static String ERR_MSGCODE_INVALID = "e412";
+	public static String ERR_CLIENT_TIME = "e413";
+	// public static String ERR_SIGN_INFO_REPEAT = "e414";
 	public static String ERR_REPAYMENT = "e420";
 	public static String ERR_UNKNOWN = "e499";
 	// public static String ERROR_TOKEN_MISS = "e001";
@@ -115,6 +117,9 @@ public class ResultFactory {
 				}
 				else if (realCode.equals(ERR_MSGCODE_INVALID)) {
 					realMsg = "短信验证码不正确";
+				}
+				else if (realCode.equals(ERR_CLIENT_TIME)) {
+					realMsg = "终端时间不正确，请同步终端时间";
 				}
 				else if (realCode.equals(ERR_REPAYMENT)) {
 					realMsg = "上端数据获取错误";
