@@ -3,16 +3,17 @@
  * 	@author wanruome
  * 	@create 2018年6月13日 上午11:27:35
  */
-package com.newpay.webauth.dal.request.userinfo;
+package com.newpay.webauth.dal.request.useraccount;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
+
+import com.ruomm.base.tools.RegexUtil;
 
 import lombok.Data;
 
 @Data
-public class UserInfoModifyPwd {
-	@NotEmpty
-	private String uuid;
+public class UserInfoModifyName {
 	@NotEmpty
 	private String userId;
 	@NotEmpty
@@ -23,9 +24,6 @@ public class UserInfoModifyPwd {
 	private String signInfo;
 	private String msgVerifyCode;
 	@NotEmpty
-	private String newPwd;
-	@NotEmpty
-	private String oldPwd;
-	private String newPwdEncrypt;
-	private String oldPwdEncrypt;
+	@Pattern(regexp = RegexUtil.APP_LOGIN_NAME)
+	private String newName;
 }

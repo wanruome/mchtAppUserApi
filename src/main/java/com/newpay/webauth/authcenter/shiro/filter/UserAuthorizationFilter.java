@@ -35,7 +35,7 @@ import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.model.MsgAuthInfo;
 import com.newpay.webauth.dal.model.MsgFunctionInfo;
 import com.newpay.webauth.dal.model.SystemLogFunction;
-import com.newpay.webauth.dal.request.userinfo.UserInfoModifyMobie;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.ruomm.base.tools.BaseWebUtils;
 import com.ruomm.base.tools.FastJsonTools;
@@ -63,9 +63,11 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	private boolean processAccessDeniedFastJson(ServletRequest request, ServletResponse response) throws IOException {
 		JSONObject jsonObject = null;
 		String contentType = request.getContentType();
+
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-		if ("POST".equals(httpServletRequest.getMethod().toUpperCase()) && null != contentType
-				&& (contentType.contains("application/json") || contentType.contains("text/plain"))) {
+		boolean isPostJson = "POST".equals(httpServletRequest.getMethod().toUpperCase()) && null != contentType
+				&& (contentType.contains("application/json") || contentType.contains("text/plain"));
+		if (isPostJson) {
 			try {
 				jsonObject = JSON.parseObject(IOUtils.toString(request.getInputStream(), "UTF-8"));
 				log.info("请求信息:" + jsonObject.toJSONString());
@@ -113,11 +115,14 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 				log.debug("对于下载文件放行");
 				return true;
 			}
+			else if (realUri.endsWith("app/systemConfig/reload")) {
+				log.debug("对于系统参数重置放行");
+				return true;
+			}
 			else {
 				throwException(response, ResultFactory.ERR_PARSE_REQUEST);
 				return false;
 			}
-
 		}
 		// 日志节点加入
 

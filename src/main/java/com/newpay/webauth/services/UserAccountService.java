@@ -5,14 +5,14 @@
  */
 package com.newpay.webauth.services;
 
-import com.newpay.webauth.dal.request.userinfo.UserInfoFindPwd;
-import com.newpay.webauth.dal.request.userinfo.UserInfoLoginReqDto;
-import com.newpay.webauth.dal.request.userinfo.UserInfoLogout;
-import com.newpay.webauth.dal.request.userinfo.UserInfoModifyEmail;
-import com.newpay.webauth.dal.request.userinfo.UserInfoModifyMobie;
-import com.newpay.webauth.dal.request.userinfo.UserInfoModifyName;
-import com.newpay.webauth.dal.request.userinfo.UserInfoModifyPwd;
-import com.newpay.webauth.dal.request.userinfo.UserInfoRegisterReqDto;
+import com.newpay.webauth.dal.request.useraccount.UserInfoFindPwd;
+import com.newpay.webauth.dal.request.useraccount.UserInfoLoginReqDto;
+import com.newpay.webauth.dal.request.useraccount.UserInfoLogout;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyEmail;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
+import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
 
 public interface UserAccountService {
 	public Object doLogin(UserInfoLoginReqDto userInfoLoginReqDto);

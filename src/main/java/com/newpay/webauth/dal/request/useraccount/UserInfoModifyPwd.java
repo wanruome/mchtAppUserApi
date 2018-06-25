@@ -3,18 +3,16 @@
  * 	@author wanruome
  * 	@create 2018年6月13日 上午11:27:35
  */
-package com.newpay.webauth.dal.request.userinfo;
+package com.newpay.webauth.dal.request.useraccount;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
-
-import com.alibaba.fastjson.annotation.JSONField;
-import com.ruomm.base.tools.RegexUtil;
 
 import lombok.Data;
 
 @Data
-public class UserInfoModifyMobie {
+public class UserInfoModifyPwd {
+	@NotEmpty
+	private String uuid;
 	@NotEmpty
 	private String userId;
 	@NotEmpty
@@ -23,10 +21,11 @@ public class UserInfoModifyMobie {
 	private String tokenId;
 	@NotEmpty
 	private String signInfo;
-	@NotEmpty
 	private String msgVerifyCode;
 	@NotEmpty
-	@Pattern(regexp = RegexUtil.MOBILE_NUM)
-	@JSONField(name = "newMobile")
-	private String newMobile;
+	private String newPwd;
+	@NotEmpty
+	private String oldPwd;
+	private String newPwdEncrypt;
+	private String oldPwdEncrypt;
 }

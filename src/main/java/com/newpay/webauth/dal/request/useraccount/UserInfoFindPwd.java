@@ -3,7 +3,7 @@
  * 	@author wanruome
  * 	@create 2018年6月11日 上午12:04:43
  */
-package com.newpay.webauth.dal.request.userinfo;
+package com.newpay.webauth.dal.request.useraccount;
 
 import javax.validation.constraints.NotEmpty;
 
