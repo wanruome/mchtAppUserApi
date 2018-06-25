@@ -201,6 +201,10 @@ public class PwdServiceImpl implements PwdService {
 	@Override
 	public PwdRuleParse parseAccountPwdRule(String pwd) {
 		PwdRuleParse ruleParse = new PwdRuleParse();
+		if (StringUtils.isEmpty(pwd)) {
+			ruleParse.setValid(true);
+			return ruleParse;
+		}
 		if (isPwdRuleOK(pwd, AppConfig.UserPwdMinLength(), AppConfig.UserPwdMaxLength(), AppConfig.UserPwdMinRule(),
 				true)) {
 			ruleParse.setValid(true);
@@ -217,6 +221,10 @@ public class PwdServiceImpl implements PwdService {
 	@Override
 	public PwdRuleParse parsePayPwdRule(String pwd) {
 		PwdRuleParse ruleParse = new PwdRuleParse();
+		if (StringUtils.isEmpty(pwd)) {
+			ruleParse.setValid(true);
+			return ruleParse;
+		}
 		if (StringUtils.getLength(pwd) < 6) {
 			ruleParse.setValid(false);
 			ruleParse.setReturnResp(ResultFactory.toNackPARAM("支付密码简单了"));

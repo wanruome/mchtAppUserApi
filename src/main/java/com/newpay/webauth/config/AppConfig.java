@@ -46,6 +46,10 @@ public class AppConfig {
 		return ConfigUtil.getValLongTime("user.pwd_err_time_limit", TimeUtils.VALUE_DAYTimeMillis / 4);
 	}
 
+	public static Integer UserIdCardInfoReturn() {
+		return ConfigUtil.getValInteger("user.idcard_info_return", 1);
+	}
+
 	public static Integer PayInfoPayPwdErrCountLimit() {
 		return ConfigUtil.getValInteger("payinfo.paypwd_err_count_limit", 5);
 	}

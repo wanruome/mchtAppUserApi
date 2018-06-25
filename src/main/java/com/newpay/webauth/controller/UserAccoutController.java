@@ -17,18 +17,21 @@ import org.springframework.web.bind.annotation.RestController;
 import com.newpay.webauth.config.EncryptConfig;
 import com.newpay.webauth.dal.core.PwdRequestParse;
 import com.newpay.webauth.dal.core.PwdRuleParse;
+import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
 import com.newpay.webauth.dal.request.useraccount.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoLoginReqDto;
 import com.newpay.webauth.dal.request.useraccount.UserInfoLogout;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyEmail;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.UserAccountService;
 import com.ruomm.base.tools.BaseWebUtils;
+import com.ruomm.base.tools.IDCardUtils;
 import com.ruomm.base.tools.StringUtils;
 
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +54,34 @@ public class UserAccoutController {
 		// if (StringUtils.isBlank(userInfoRegister.getPwdEncrypt())) {
 		// userInfoRegister.setPwdEncrypt(AppConfig.UserPwdEncryptDefault);
 		// }
+		if (!StringUtils.isEmpty(userInfoRegister.getIdCardName())) {
+			if (userInfoRegister.getIdCardName().length() > 10) {
+				return ResultFactory.toNackPARAM("真实姓名不能超过10字符");
+			}
+		}
+		if (!StringUtils.isEmpty(userInfoRegister.getIdCardNo())) {
+			boolean idFlag = false;
+			try {
+				idFlag = IDCardUtils.isIDCardValidate(userInfoRegister.getIdCardNo());
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				idFlag = false;
+			}
+			if (!idFlag) {
+				return ResultFactory.toNackPARAM("身份证号有错误");
+			}
+		}
+		if (!StringUtils.isEmpty(userInfoRegister.getNickName())) {
+			if (userInfoRegister.getNickName().length() > 16) {
+				return ResultFactory.toNackPARAM("昵称不能超过16位");
+			}
+		}
+		if (!StringUtils.isEmpty(userInfoRegister.getHeadImg())) {
+			if (userInfoRegister.getHeadImg().length() > 100) {
+				return ResultFactory.toNackPARAM("头像路径太长了");
+			}
+		}
 		PwdRequestParse pwdParse = pwdService.parseRequsetPwd(userInfoRegister.getPwd(),
 				userInfoRegister.getPwdEncrypt(), userInfoRegister.getUuid());
 		if (!pwdParse.isValid()) {
@@ -171,6 +202,56 @@ public class UserAccoutController {
 		}
 		return userAccountService.doLogout(userInfoLogout);
 
+	}
+
+	@ApiOperation("修改用户其他信息")
+	@PostMapping("/doModifyUserInfo")
+	public Object doModifyUserInfo(@Valid @RequestBody UserInfoModifyOther userInfoModifyOther,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+		// if (StringUtils.isBlank(userInfoRegister.getPwdEncrypt())) {
+		// userInfoRegister.setPwdEncrypt(AppConfig.UserPwdEncryptDefault);
+		// }
+		if (!StringUtils.isEmpty(userInfoModifyOther.getIdCardName())) {
+			if (userInfoModifyOther.getIdCardName().length() > 10) {
+				return ResultFactory.toNackPARAM("真实姓名不能超过10字符");
+			}
+		}
+		if (!StringUtils.isEmpty(userInfoModifyOther.getIdCardNo())) {
+			boolean idFlag = false;
+			try {
+				idFlag = IDCardUtils.isIDCardValidate(userInfoModifyOther.getIdCardNo());
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				idFlag = false;
+			}
+			if (!idFlag) {
+				return ResultFactory.toNackPARAM("身份证号有错误");
+			}
+		}
+		if (!StringUtils.isEmpty(userInfoModifyOther.getNickName())) {
+			if (userInfoModifyOther.getNickName().length() > 16) {
+				return ResultFactory.toNackPARAM("昵称不能超过16位");
+			}
+		}
+		if (!StringUtils.isEmpty(userInfoModifyOther.getHeadImg())) {
+			if (userInfoModifyOther.getHeadImg().length() > 100) {
+				return ResultFactory.toNackPARAM("头像路径太长了");
+			}
+		}
+		return userAccountService.doModifyUserInfo(userInfoModifyOther);
+	}
+
+	@ApiOperation("修改用户其他信息")
+	@PostMapping("/doGetUserInfo")
+	public Object doGetUserInfo(@Valid @RequestBody UserAccountReqDto userAccountReqDto, BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+		return userAccountService.doGetUserInfo(userAccountReqDto);
 	}
 
 }

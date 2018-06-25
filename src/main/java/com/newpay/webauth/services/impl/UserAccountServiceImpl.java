@@ -21,6 +21,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.newpay.webauth.aop.SystemLogThreadLocal;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.EncryptConfig;
+import com.newpay.webauth.config.util.StringMask;
 import com.newpay.webauth.dal.core.PwdErrParse;
 import com.newpay.webauth.dal.core.TokenResponseParse;
 import com.newpay.webauth.dal.mapper.LoginAppInfoMapper;
@@ -28,12 +29,14 @@ import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
 import com.newpay.webauth.dal.model.LoginAppInfo;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
+import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
 import com.newpay.webauth.dal.request.useraccount.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoLoginReqDto;
 import com.newpay.webauth.dal.request.useraccount.UserInfoLogout;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyEmail;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
+import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
@@ -139,6 +142,10 @@ public class UserAccountServiceImpl implements UserAccountService {
 		insertUserAccount.setPwdErrCount(0);
 		insertUserAccount.setLastAuthUuid(loginUserReqDto.getUuid());
 		insertUserAccount.setLastAuthTime(nowTimeStr);
+		insertUserAccount.setIdCardName(EncryptConfig.encryptPWD(loginUserReqDto.getIdCardName()));
+		insertUserAccount.setIdCardNo(EncryptConfig.encryptPWD(loginUserReqDto.getIdCardNo()));
+		insertUserAccount.setNickName(loginUserReqDto.getNickName());
+		insertUserAccount.setHeadImg(loginUserReqDto.getHeadImg());
 		SystemLogThreadLocal.setUserId(insertUserAccount.getLoginId());
 		int dbResult = loginUserAccountMapper.insertSelective(insertUserAccount);
 		if (dbResult > 0) {
@@ -261,6 +268,9 @@ public class UserAccountServiceImpl implements UserAccountService {
 		resultData.put("email", resultLoginUserAccount.getLoginEmail());
 		resultData.put("name", resultLoginUserAccount.getLoginName());
 		resultData.put("mobile", resultLoginUserAccount.getLoginMobile());
+		resultData.put("nickName", resultLoginUserAccount.getNickName());
+		resultData.put("headImg", resultLoginUserAccount.getHeadImg());
+		putIdCardInfo(resultData, resultLoginUserAccount);
 		return ResultFactory.toAck(resultData);
 	}
 
@@ -477,6 +487,67 @@ public class UserAccountServiceImpl implements UserAccountService {
 
 	}
 
+	@Override
+	public Object doGetUserInfo(UserAccountReqDto userAccountReqDto) {
+		LoginUserAccount resultUserAccount = queryLoginUserAccount(userAccountReqDto.getUserId());
+		if (null == resultUserAccount || resultUserAccount.getStatus() != 1) {
+			return ResultFactory.toNackDB("用户账号不存在或已停用");
+		}
+		Map<String, String> resultData = new HashMap<String, String>();
+		resultData.put("userId", resultUserAccount.getLoginId());
+		resultData.put("email", resultUserAccount.getLoginEmail());
+		resultData.put("name", resultUserAccount.getLoginName());
+		resultData.put("mobile", resultUserAccount.getLoginMobile());
+		resultData.put("nickName", resultUserAccount.getNickName());
+		resultData.put("headImg", resultUserAccount.getHeadImg());
+		putIdCardInfo(resultData, resultUserAccount);
+		return ResultFactory.toAck(resultData);
+	}
+
+	@Override
+	public Object doModifyUserInfo(UserInfoModifyOther userInfoModifyOther) {
+		int modifyCount = 0;
+		LoginUserAccount updateUserAccount = new LoginUserAccount();
+		updateUserAccount.setLoginId(userInfoModifyOther.getUserId());
+		if (!StringUtils.isEmpty(userInfoModifyOther.getNickName())) {
+			updateUserAccount.setNickName(userInfoModifyOther.getNickName());
+			modifyCount++;
+		}
+		if (!StringUtils.isEmpty(userInfoModifyOther.getHeadImg())) {
+			updateUserAccount.setHeadImg(userInfoModifyOther.getHeadImg());
+			modifyCount++;
+		}
+		if (!StringUtils.isEmpty(userInfoModifyOther.getIdCardNo())) {
+			updateUserAccount.setIdCardNo(EncryptConfig.encryptPWD(userInfoModifyOther.getIdCardNo()));
+			modifyCount++;
+		}
+		if (!StringUtils.isEmpty(userInfoModifyOther.getIdCardName())) {
+			updateUserAccount.setIdCardName(EncryptConfig.encryptPWD(userInfoModifyOther.getIdCardName()));
+			modifyCount++;
+		}
+		if (modifyCount <= 0) {
+			return ResultFactory.toNackPARAM("没有待修改的内容");
+		}
+		LoginUserAccount resultUserAccount = queryLoginUserAccount(userInfoModifyOther.getUserId());
+		if (null == resultUserAccount || resultUserAccount.getStatus() != 1) {
+			return ResultFactory.toNackDB("用户账号不存在或已停用");
+		}
+		if (!StringUtils.isEmpty(resultUserAccount.getIdCardName()) && null != updateUserAccount.getIdCardName()) {
+			return ResultFactory.toNackDB("真实姓名只能设置一次");
+		}
+		if (!StringUtils.isEmpty(resultUserAccount.getIdCardNo()) && null != updateUserAccount.getIdCardNo()) {
+			return ResultFactory.toNackDB("身份证号只能设置一次");
+		}
+		updateUserAccount.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
+		boolean dbResultflag = updateLoginUserAccount(resultUserAccount, updateUserAccount);
+		if (dbResultflag) {
+			return ResultFactory.toAck(null);
+		}
+		else {
+			return ResultFactory.toNackDB();
+		}
+	}
+
 	public LoginUserAccount queryLoginUserAccount(String userId) {
 		LoginUserAccount queryUserAccount = new LoginUserAccount();
 		queryUserAccount.setLoginId(userId);
@@ -623,6 +694,41 @@ public class UserAccountServiceImpl implements UserAccountService {
 		updateUserAccount.setVersion(dbLoginUserAccount.getVersion());
 		int dbResult = loginUserAccountMapper.updateByPrimaryKeySelective(updateUserAccount);
 		return dbResult > 0 ? true : false;
+	}
+
+	private void putIdCardInfo(Map<String, String> resultMap, LoginUserAccount resultUserAccount) {
+		try {
+			if (null == AppConfig.UserIdCardInfoReturn() || AppConfig.UserIdCardInfoReturn() <= 0) {
+			}
+			else if (AppConfig.UserIdCardInfoReturn() == 1) {
+				String idCardNo = EncryptConfig.decryptPWD(resultUserAccount.getIdCardNo());
+				String idCardName = EncryptConfig.decryptPWD(resultUserAccount.getIdCardName());
+				resultMap.put("idCardNo", idCardNo);
+				resultMap.put("idCardName", idCardName);
+			}
+			else if (AppConfig.UserIdCardInfoReturn() >= 2) {
+				String idCardNo = EncryptConfig.decryptPWD(resultUserAccount.getIdCardNo());
+				String idCardName = EncryptConfig.decryptPWD(resultUserAccount.getIdCardName());
+				resultMap.put("idCardNo", StringMask.getMaskString(idCardNo));
+				resultMap.put("idCardName", StringMask.getMaskString(idCardName));
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (StringUtils.isEmpty(resultUserAccount.getIdCardNo())) {
+			resultMap.put("idCardNoSet", "0");
+		}
+		else {
+			resultMap.put("idCardNoSet", "1");
+		}
+		if (StringUtils.isEmpty(resultUserAccount.getIdCardNo())) {
+			resultMap.put("idCardNameSet", "0");
+		}
+		else {
+			resultMap.put("idCardNameSet", "1");
+		}
+
 	}
 	// public boolean updateLoginUserInfo(LoginUserAccount dbLoginUserAccount, LoginUserAccount
 	// updateUserAccount) {

@@ -26,5 +26,9 @@ public class UserInfoRegisterReqDto {
 	private String name;
 	private String mobie;
 	private String email;
+	private String idCardName;
+	private String idCardNo;
+	private String nickName;
+	private String headImg;
 
 }

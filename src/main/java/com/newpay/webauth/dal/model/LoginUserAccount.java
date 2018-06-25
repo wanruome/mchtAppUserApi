@@ -44,6 +44,14 @@ public class LoginUserAccount {
 	@Version
 	@Column(name = "VERSION")
 	private Integer version;
+	@Column(name = "IDCARD_NAME")
+	private String idCardName;
+	@Column(name = "IDCARD_NO")
+	private String idCardNo;
+	@Column(name = "NICK_NAME")
+	private String nickName;
+	@Column(name = "HEAD_IMG")
+	private String headImg;
 
 	// public boolean parsePwdForSet(String pwd) {
 	// this.loginPwd = DesUtil.encryptString(pwd, EncrptyConfig.PWD_3DES);
