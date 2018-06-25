@@ -130,11 +130,6 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 		if (!pwdErrParse.isValid()) {
 			return pwdErrParse.getReturnResp();
 		}
-		// if
-		// (!payInfoPayModifyPayPwdReqDto.getOldPwd().equals(EncryptConfig.decryptPayPwd(resultPayInfo.getPayPwd())))
-		// {
-		// return ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, "旧的支付密码");
-		// }
 		String pwdEncrypt = EncryptConfig.encryptPayPwd(payInfoPayModifyPayPwdReqDto.getNewPayPwd());
 		if (StringUtils.isEmpty(pwdEncrypt)) {
 			ResultFactory.toNack(ResultFactory.ERR_PWD_PARSE, null);
@@ -143,8 +138,6 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 		updateBean.setUserId(payInfoPayModifyPayPwdReqDto.getUserId());
 		updateBean.setPayPwd(pwdEncrypt);
 		updateBean.setUpdateTime(AppConfig.SDF_DB_TIME.format(new Date()));
-		updateBean.setPwdErrCount(0);
-		updateBean.setPwdErrTime(pwdErrParse.getPwdErrTime());
 		boolean dbFlag = updateRepaymentPayInfo(resultPayInfo, updateBean);
 		if (dbFlag) {
 			Map<String, String> mapResult = new HashMap<String, String>();
@@ -280,34 +273,43 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 			if (dbResult > 0) {
 				resultPayInfo.setVersion(resultPayInfo.getVersion() + 1);
 				pwdErrParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_PWD_WRONG, pwdRemark + "错误"));
+				return pwdErrParse;
 			}
 			else {
 				pwdErrParse.setReturnResp(ResultFactory.toNackDB());
+				return pwdErrParse;
 			}
 		}
 		else {
-			pwdErrParse.setValid(true);
+			// pwdErrParse.setValid(true);
+			// pwdErrParse.setPwdErrCount(0);
+			// pwdErrParse.setPwdErrTime(PWD_ERR_NONE);
+			// pwdErrParse.setLastAuthTime(AppConfig.SDF_DB_TIME.format(date));
 			pwdErrParse.setPwdErrCount(0);
 			pwdErrParse.setPwdErrTime(PWD_ERR_NONE);
 			pwdErrParse.setLastAuthTime(AppConfig.SDF_DB_TIME.format(date));
-			// RepayMentPayInfo updateBean = new RepayMentPayInfo();
-			// updateBean.setUserId(resultPayInfo.getUserId());
-			// updateBean.setPwdErrCount(0);
-			// updateBean.setPwdErrTime(PWD_ERR_NONE);
-			// updateBean.setVersion(resultPayInfo.getVersion());
-			// int dbResult = repayMentPayInfoMapper.updateByPrimaryKeySelective(updateBean);
-			// if (dbResult > 0) {
-			// resultPayInfo.setVersion(resultPayInfo.getVersion() + 1);
-			// pwdErrParse.setValid(true);
-			// return pwdErrParse;
-			// }
-			// else {
-			// pwdErrParse.setValid(false);
-			// pwdErrParse.setReturnResp(ResultFactory.toNackDB());
-			// }
+			int dbResult = 1;
+			if (null == resultPayInfo.getPwdErrCount() || 0 != resultPayInfo.getPwdErrCount()
+					|| StringUtils.getLength(resultPayInfo.getPwdErrTime()) > 10) {
+				RepayMentPayInfo updateBean = new RepayMentPayInfo();
+				updateBean.setUserId(resultPayInfo.getUserId());
+				updateBean.setPwdErrCount(0);
+				updateBean.setPwdErrTime(PWD_ERR_NONE);
+				updateBean.setVersion(resultPayInfo.getVersion());
+				dbResult = repayMentPayInfoMapper.updateByPrimaryKeySelective(updateBean);
+				resultPayInfo.setVersion(resultPayInfo.getVersion() + 1);
+			}
+			if (dbResult > 0) {
+				pwdErrParse.setValid(true);
+				return pwdErrParse;
+			}
+			else {
+				pwdErrParse.setValid(false);
+				pwdErrParse.setReturnResp(ResultFactory.toNackDB());
+				return pwdErrParse;
+			}
 		}
 
-		return pwdErrParse;
 	}
 
 	public static String parseErrTimeRespnseToString(long errTime) {
@@ -319,10 +321,10 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 			return timeMin + "分钟后重试或找回密码";
 		}
 		else if (timeMin % 60 < 30) {
-			return timeMin / 60 + "后重试或找回密码";
+			return timeMin / 60 + "小时后重试或找回密码";
 		}
 		else {
-			return (timeMin / 60 + 1) + "后重试或找回密码";
+			return (timeMin / 60 + 1) + "小时后重试或找回密码";
 		}
 	}
 
