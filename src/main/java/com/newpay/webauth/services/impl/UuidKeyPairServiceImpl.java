@@ -128,10 +128,9 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 		else {
 			// 加入传输安全选项
 			String tmpString = null;
-			if (!StringUtils.isEmpty(uuidKeyPairReqDto.getRasPublicKey())
-					&& keyType.equals(AppConfig.PWD_ENCRYPT_3DES)) {
+			if (!StringUtils.isEmpty(uuidKeyPairReqDto.getRasPublicKey())) {
 				PublicKey publicKey = RSAUtils.loadPublicKey(uuidKeyPairReqDto.getRasPublicKey());
-				tmpString = Base64.encode(RSAUtils.encryptData(returnKeyPair.getPublicKey().getBytes(), publicKey));
+				tmpString = Base64.encode(RSAUtils.encryptDataBig(returnKeyPair.getPublicKey().getBytes(), publicKey));
 			}
 			else {
 				tmpString = returnKeyPair.getPublicKey();
@@ -139,7 +138,6 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 			if (StringUtils.isEmpty(tmpString)) {
 				return ResultFactory.toNackDB();
 			}
-
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("uuid", returnKeyPair.getUuid());
 			jsonObject.put("publicKey", tmpString);
