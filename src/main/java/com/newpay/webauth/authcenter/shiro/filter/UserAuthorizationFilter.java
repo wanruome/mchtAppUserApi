@@ -31,12 +31,14 @@ import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
 import com.newpay.webauth.dal.mapper.LoginUserTokenMapper;
 import com.newpay.webauth.dal.mapper.MsgAuthInfoMapper;
 import com.newpay.webauth.dal.mapper.SignInfoManagerMapper;
+import com.newpay.webauth.dal.mapper.UuidKeyPairMapper;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.model.MsgAuthInfo;
 import com.newpay.webauth.dal.model.MsgFunctionInfo;
 import com.newpay.webauth.dal.model.SignInfoManager;
 import com.newpay.webauth.dal.model.SystemLogFunction;
+import com.newpay.webauth.dal.model.UuidKeyPair;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.ruomm.base.tools.BaseWebUtils;
@@ -55,6 +57,8 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	MsgAuthInfoMapper msgAuthInfoMapper;
 	@Autowired
 	SignInfoManagerMapper signInfoManagerMapper;
+	@Autowired
+	UuidKeyPairMapper uuidKeyPairMapper;
 
 	@Override
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws IOException {
@@ -156,6 +160,7 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			}
 			SystemLogThreadLocal.setSysLogBean(sysLogBean);
 		}
+
 		// 进行短信验证码验证流程
 		String verifyCode = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_VERIFY_CODE);
 		if (!StringUtils.isEmpty(verifyCode)) {
@@ -227,37 +232,28 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 				}
 			}
 		}
-		// 进行签名验证流程
+		// 进行客户端服务端时间校验
 		String signInfo = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_SIGN_INFO);
-		if (StringUtils.isEmpty(signInfo)) {
-			return true;
-		}
-		else {
-			String userId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_USER_ID);
-			String appId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_APP_ID);
-			String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
-
-			if (AppConfig.RequestTimeStampOffSet() >= AppConfig.REQUEST_TIMESTAMP_MIN_OFFSET) {
-				long dateTimeNow = new Date().getTime();
-				String timeStamp = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap,
-						AppConfig.REQUEST_FIELD_TIMESTAMP);
-				if (StringUtils.isEmpty(timeStamp)) {
-					throwException(response, ResultFactory.ERR_PRARM, "必须上送timeStamp字段");
-					return false;
-				}
-				Long reqTimeSkip = 0l;
-				try {
-					reqTimeSkip = Math.abs(Long.parseLong(timeStamp) - dateTimeNow);
-				}
-				catch (Exception e) {
-					reqTimeSkip = -1l;
-				}
-				if (reqTimeSkip < 0 || reqTimeSkip > AppConfig.RequestTimeStampOffSet()) {
-					throwException(response, ResultFactory.ERR_CLIENT_TIME);
-					log.debug("终端时间不正确");
-					return false;
-				}
-				//
+		if (AppConfig.RequestTimeStampOffSet() >= AppConfig.REQUEST_TIMESTAMP_MIN_OFFSET) {
+			long dateTimeNow = new Date().getTime();
+			String timeStamp = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TIMESTAMP);
+			if (StringUtils.isEmpty(timeStamp)) {
+				throwException(response, ResultFactory.ERR_PRARM, "必须上送timeStamp字段");
+				return false;
+			}
+			Long reqTimeSkip = 0l;
+			try {
+				reqTimeSkip = Math.abs(Long.parseLong(timeStamp) - dateTimeNow);
+			}
+			catch (Exception e) {
+				reqTimeSkip = -1l;
+			}
+			if (reqTimeSkip < 0 || reqTimeSkip > AppConfig.RequestTimeStampOffSet()) {
+				throwException(response, ResultFactory.ERR_CLIENT_TIME);
+				log.debug("终端时间不正确");
+				return false;
+			}
+			if (!StringUtils.isEmpty(signInfo)) {
 				SignInfoManager signInfoManager = new SignInfoManager();
 				signInfoManager.setSignInfoValue(signInfo);
 				signInfoManager.setCreateTime(dateTimeNow);
@@ -271,20 +267,52 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 				}
 				if (dbResult <= 0) {
 					throwException(response, ResultFactory.ERR_PRARM, "请求信息不可以重复。");
-					log.debug("终端时间不正确");
+					log.debug("请求信息不可以重复。");
 					return false;
 				}
+			}
 
+		}
+		// 进行签名验证流程
+		if (StringUtils.isEmpty(signInfo)) {
+			return true;
+		}
+		else {
+			String userId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_USER_ID);
+			if (StringUtils.isEmpty(userId)) {
+				String uuid = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_UUID);
+				String uuidEncrypt = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap,
+						AppConfig.REQUEST_FIELD_UUID_ENCRYPT);
+				if (AppConfig.PWD_ENCRYPT_3DESMD5.equals(uuidEncrypt)) {
+					uuidEncrypt = AppConfig.PWD_ENCRYPT_3DES;
+				}
+				else if (AppConfig.PWD_ENCRYPT_RSAMD5.equals(uuidEncrypt)) {
+					uuidEncrypt = AppConfig.PWD_ENCRYPT_RSA;
+				}
+				String token = getPublicKeyByUuidAndEncrypt(uuid, uuidEncrypt);
+				if (SignTools.verifySign(jsonObject, token)) {
+					log.debug("签名验证成功");
+					return true;
+				}
+				{
+					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					log.debug("签名验证失败");
+					return false;
+				}
 			}
-			String token = getTokenById(tokenId, userId, appId);
-			if (SignTools.verifySign(jsonObject, token)) {
-				log.debug("签名验证成功");
-				return true;
-			}
-			{
-				throwException(response, ResultFactory.ERR_TOKEN_INVALID);
-				log.debug("签名验证失败");
-				return false;
+			else {
+				String appId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_APP_ID);
+				String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
+				String token = getTokenById(tokenId, userId, appId);
+				if (SignTools.verifySign(jsonObject, token)) {
+					log.debug("签名验证成功");
+					return true;
+				}
+				{
+					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					log.debug("签名验证失败");
+					return false;
+				}
 			}
 
 		}
@@ -414,6 +442,22 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		// }
 		// TODO Auto-generated method stub
 
+	}
+
+	public String getPublicKeyByUuidAndEncrypt(String uuid, String encrypt) {
+		if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(encrypt)) {
+			return null;
+		}
+		UuidKeyPair queryKeyPair = new UuidKeyPair();
+		queryKeyPair.setUuid(uuid);
+		queryKeyPair.setKeyType(encrypt);
+		UuidKeyPair resultKeyPair = uuidKeyPairMapper.selectByPrimaryKey(queryKeyPair);
+		if (null == resultKeyPair) {
+			return null;
+		}
+		else {
+			return resultKeyPair.getPublicKey();
+		}
 	}
 
 	public String getTokenById(String tokenId, String userId, String appId) {

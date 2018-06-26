@@ -253,7 +253,7 @@ CREATE TABLE `tbl_repayment_payinfo` (
 --  Table structure for `tbl_signi_nfo_manager`
 -- ----------------------------
 DROP TABLE IF EXISTS `tbl_signi_nfo_manager`;
-CREATE TABLE `tbl_signi_nfo_manager` (
+CREATE TABLE `tbl_sign_info_manager` (
   `SIGN_INFO_VALUE` varchar(64) NOT NULL DEFAULT '',
   `CREATE_TIME` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`SIGN_INFO_VALUE`)

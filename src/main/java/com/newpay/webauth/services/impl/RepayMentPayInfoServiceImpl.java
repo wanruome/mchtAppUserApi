@@ -70,8 +70,8 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 			else {
 				mapResult.put("payPwdStatus", "1");
 			}
-			mapResult.put("limitAcount", resultPayInfo.getLimitAmount() + "");
-			mapResult.put("noPwdAount", resultPayInfo.getNoPwdAmount() + "");
+			mapResult.put("limitAmount", resultPayInfo.getLimitAmount() + "");
+			mapResult.put("noPwdAmount", resultPayInfo.getNoPwdAmount() + "");
 			mapResult.put("noPwdFlag", resultPayInfo.getNoPwdFlag() + "");
 			return ResultFactory.toAck(mapResult);
 		}

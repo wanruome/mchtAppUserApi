@@ -148,6 +148,7 @@ public class AppConfig {
 	public static final String REQUEST_FIELD_TOKEN_ID = "tokenId";
 	public static final String REQUEST_FIELD_TIMESTAMP = "timeStamp";
 	public static final String REQUEST_FIELD_VERIFY_CODE = "msgVerifyCode";
+	public static final String REQUEST_FIELD_UUID_ENCRYPT = "uuidEncrypt";
 	public static final long REQUEST_TIMESTAMP_MIN_OFFSET = 60000l;
 	public static SimpleDateFormat SDF_DB_DATE = new SimpleDateFormat("yyyyMMdd");
 	public static SimpleDateFormat SDF_DB_TIME = new SimpleDateFormat("yyyyMMddHHmmssSSS");

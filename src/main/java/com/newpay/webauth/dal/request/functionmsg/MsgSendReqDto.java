@@ -11,12 +11,13 @@ import lombok.Data;
 
 @Data
 public class MsgSendReqDto {
+	private String uuid;
+	private String uuidEncrypt;
 	private String appId;
 	private String userId;
 	private String tokenId;
-	private String signInfo;
 	@NotEmpty
-	private String uuid;
+	private String signInfo;
 	@NotEmpty
 	private String msgFunction;
 	@NotEmpty

@@ -12,7 +12,7 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Data
-@Table(name = "TBL_SIGNI_NFO_MANAGER")
+@Table(name = "TBL_SIGN_INFO_MANAGER")
 public class SignInfoManager {
 	@Id
 	@Column(name = "SIGN_INFO_VALUE")

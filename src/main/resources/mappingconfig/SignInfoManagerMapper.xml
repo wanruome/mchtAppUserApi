@@ -7,7 +7,7 @@
 			<result property="createTime" column="CREATE_TIME" jdbcType="NUMERIC"/>
 	</resultMap>
 	<delete id="deleteAllHistoryValue">
-		<![CDATA[delete from TBL_SIGNI_NFO_MANAGER where CREATE_TIME <#{createTime} ]]>
+		<![CDATA[delete from TBL_SIGN_INFO_MANAGER where CREATE_TIME <#{createTime} ]]>
 	</delete>
 </mapper>
 

@@ -14,6 +14,10 @@ public class UserInfoLoginReqDto {
 	@NotEmpty
 	private String uuid;
 	@NotEmpty
+	private String uuidEncrypt;
+	@NotEmpty
+	private String signInfo;
+	@NotEmpty
 	private String appId;
 	@NotEmpty
 	private String termType;

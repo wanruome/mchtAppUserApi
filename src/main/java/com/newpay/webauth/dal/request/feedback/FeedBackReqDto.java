@@ -17,10 +17,12 @@ public class FeedBackReqDto {
 	@NotEmpty
 	@Length(min = 24, max = 40)
 	private String uuid;
+	private String uuidEncrypt;
 	@NotEmpty
 	private String appId;
 	private String userId;
 	private String tokenId;
+	@NotEmpty
 	private String signInfo;
 	@NotEmpty
 	@Length(min = 6, max = 64)

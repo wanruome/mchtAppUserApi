@@ -14,6 +14,10 @@ public class UserInfoRegisterReqDto {
 	@NotEmpty
 	private String uuid;
 	@NotEmpty
+	private String uuidEncrypt;
+	@NotEmpty
+	private String signInfo;
+	@NotEmpty
 	private String account;
 	@NotEmpty
 	private String accountType;

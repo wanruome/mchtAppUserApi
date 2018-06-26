@@ -19,7 +19,6 @@ import lombok.Data;
 @Data
 public class AppInfoModify {
 	@NotEmpty
-
 	private String appId;
 	@NotEmpty
 	private String appPwd;
