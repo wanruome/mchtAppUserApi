@@ -98,25 +98,91 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			}
 			else if (realUri.endsWith("app/fileCore/uploadFile")) {
 				log.debug("对于上传文件放行");
-				String userId = httpServletRequest.getHeader("userId");
-				String appId = httpServletRequest.getHeader("appId");
-				String tokenId = httpServletRequest.getHeader("tokenId");
-				String signInfo = httpServletRequest.getHeader("signInfo");
-				String uuid = httpServletRequest.getHeader("uuid");
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("userId", userId);
-				map.put("appId", appId);
-				map.put("tokenId", tokenId);
-				map.put("uuid", uuid);
-				String token = getTokenById(tokenId, userId, appId);
-				if (SignTools.verifySign(map, signInfo, token)) {
-					log.debug("签名验证成功");
-					return true;
+				String timeStamp = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_TIMESTAMP);
+				String uuid = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_UUID);
+				String uuidEncrypt = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_UUID_ENCRYPT);
+				String userId = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_USER_ID);
+				String appId = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_APP_ID);
+				String tokenId = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_TOKEN_ID);
+				String signInfo = httpServletRequest.getHeader(AppConfig.REQUEST_FIELD_SIGN_INFO);
+				if (AppConfig.RequestTimeStampOffSet() >= AppConfig.REQUEST_TIMESTAMP_MIN_OFFSET) {
+					long dateTimeNow = new Date().getTime();
+					if (StringUtils.isEmpty(timeStamp)) {
+						throwException(response, ResultFactory.ERR_PRARM, "必须上送timeStamp字段");
+						return false;
+					}
+					Long reqTimeSkip = 0l;
+					try {
+						reqTimeSkip = Math.abs(Long.parseLong(timeStamp) - dateTimeNow);
+					}
+					catch (Exception e) {
+						reqTimeSkip = -1l;
+					}
+					if (reqTimeSkip < 0 || reqTimeSkip > AppConfig.RequestTimeStampOffSet()) {
+						throwException(response, ResultFactory.ERR_CLIENT_TIME);
+						log.debug("终端时间不正确");
+						return false;
+					}
+					if (!StringUtils.isEmpty(signInfo)) {
+						SignInfoManager signInfoManager = new SignInfoManager();
+						signInfoManager.setSignInfoValue(signInfo);
+						signInfoManager.setCreateTime(dateTimeNow);
+						int dbResult = 0;
+						try {
+							dbResult = signInfoManagerMapper.insert(signInfoManager);
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+							dbResult = 0;
+						}
+						if (dbResult <= 0) {
+							throwException(response, ResultFactory.ERR_PRARM, "请求信息不可以重复。");
+							log.debug("请求信息不可以重复。");
+							return false;
+						}
+					}
+
 				}
-				{
-					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
-					log.debug("签名验证失败");
-					return false;
+
+				Map<String, String> map = new HashMap<String, String>();
+				map.put(AppConfig.REQUEST_FIELD_TIMESTAMP, timeStamp);
+				map.put(AppConfig.REQUEST_FIELD_UUID, uuid);
+				map.put(AppConfig.REQUEST_FIELD_UUID_ENCRYPT, uuidEncrypt);
+				map.put(AppConfig.REQUEST_FIELD_USER_ID, userId);
+				map.put(AppConfig.REQUEST_FIELD_APP_ID, appId);
+				map.put(AppConfig.REQUEST_FIELD_TOKEN_ID, tokenId);
+				if (StringUtils.isEmpty(userId)) {
+					String keyType = null;
+					if (AppConfig.PWD_ENCRYPT_3DESMD5.equals(uuidEncrypt)
+							|| AppConfig.PWD_ENCRYPT_3DES.equals(uuidEncrypt)) {
+						keyType = AppConfig.PWD_ENCRYPT_3DES;
+					}
+					else if (AppConfig.PWD_ENCRYPT_RSAMD5.equals(uuidEncrypt)
+							|| AppConfig.PWD_ENCRYPT_RSA.equals(uuidEncrypt)) {
+						keyType = AppConfig.PWD_ENCRYPT_RSA;
+					}
+					String token = getPublicKeyByUuidAndEncrypt(uuid, keyType);
+					if (SignTools.verifySign(map, signInfo, token)) {
+						log.debug("签名验证成功");
+						return true;
+					}
+					{
+						throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+						log.debug("签名验证失败");
+						return false;
+					}
+				}
+				else {
+					String token = getTokenById(tokenId, userId, appId);
+					if (SignTools.verifySign(map, signInfo, token)) {
+						log.debug("签名验证成功");
+						return true;
+					}
+					{
+						throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+						log.debug("签名验证失败");
+						return false;
+					}
 				}
 			}
 			else if (realUri.endsWith("app/fileCore/getFile")) {
@@ -278,18 +344,25 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			return true;
 		}
 		else {
+
+			String uuid = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_UUID);
+			String uuidEncrypt = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap,
+					AppConfig.REQUEST_FIELD_UUID_ENCRYPT);
 			String userId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_USER_ID);
+			String appId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_APP_ID);
+			String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
+
 			if (StringUtils.isEmpty(userId)) {
-				String uuid = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_UUID);
-				String uuidEncrypt = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap,
-						AppConfig.REQUEST_FIELD_UUID_ENCRYPT);
-				if (AppConfig.PWD_ENCRYPT_3DESMD5.equals(uuidEncrypt)) {
-					uuidEncrypt = AppConfig.PWD_ENCRYPT_3DES;
+				String keyType = null;
+				if (AppConfig.PWD_ENCRYPT_3DESMD5.equals(uuidEncrypt)
+						|| AppConfig.PWD_ENCRYPT_3DES.equals(uuidEncrypt)) {
+					keyType = AppConfig.PWD_ENCRYPT_3DES;
 				}
-				else if (AppConfig.PWD_ENCRYPT_RSAMD5.equals(uuidEncrypt)) {
-					uuidEncrypt = AppConfig.PWD_ENCRYPT_RSA;
+				else if (AppConfig.PWD_ENCRYPT_RSAMD5.equals(uuidEncrypt)
+						|| AppConfig.PWD_ENCRYPT_RSA.equals(uuidEncrypt)) {
+					keyType = AppConfig.PWD_ENCRYPT_RSA;
 				}
-				String token = getPublicKeyByUuidAndEncrypt(uuid, uuidEncrypt);
+				String token = getPublicKeyByUuidAndEncrypt(uuid, keyType);
 				if (SignTools.verifySign(jsonObject, token)) {
 					log.debug("签名验证成功");
 					return true;
@@ -301,8 +374,6 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 				}
 			}
 			else {
-				String appId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_APP_ID);
-				String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
 				String token = getTokenById(tokenId, userId, appId);
 				if (SignTools.verifySign(jsonObject, token)) {
 					log.debug("签名验证成功");
