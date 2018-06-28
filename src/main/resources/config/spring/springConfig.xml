@@ -72,7 +72,7 @@
         <!--  
             这里表示的是每隔五秒执行一次  
         -->  
-        <task:scheduled ref="webAppTask" method="clearHistorySignInfo" cron="* */10 * * * ?" />  
+        <task:scheduled ref="webAppTask" method="clearHistorySignInfo" cron="0 */10 * * * ?" />  
     </task:scheduled-tasks>  
       
     <!-- 自动扫描的包名 -->    
