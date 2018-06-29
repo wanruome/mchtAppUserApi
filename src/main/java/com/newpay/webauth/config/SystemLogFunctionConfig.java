@@ -51,11 +51,15 @@ public class SystemLogFunctionConfig {
 
 	}
 
-	public static void reload() {
+	public static void forceLoad() {
 		systemLogFunctionMap = null;
+		getAllSystemLogFunction();
 	}
 
 	private static synchronized void getAllSystemLogFunction() {
+		if (null != systemLogFunctionMap) {
+			return;
+		}
 		try {
 			SystemLogFunctionService systemLogFunctionInfoService = SpringContextHolder
 					.getBean(SystemLogFunctionService.class);

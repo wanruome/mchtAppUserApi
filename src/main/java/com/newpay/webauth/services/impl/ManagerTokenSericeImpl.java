@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.base.mchtApi.util.repayment.util.RepayMentConstant;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.ConfigUtil;
+import com.newpay.webauth.config.SystemLogFunctionConfig;
 import com.newpay.webauth.dal.mapper.ManagerTokenMapper;
 import com.newpay.webauth.dal.model.ManagerToken;
 import com.newpay.webauth.dal.response.ResultFactory;
@@ -53,6 +54,7 @@ public class ManagerTokenSericeImpl implements ManagerTokenSerice {
 			if (null != resultToken && token.equals(resultToken.getAuthToken())) {
 				ConfigUtil.forceLoadProperty();
 				RepayMentConstant.forceLoadProperty();
+				SystemLogFunctionConfig.forceLoad();
 				return ResultFactory.toAck(null);
 			}
 			else {
