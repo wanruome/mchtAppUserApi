@@ -162,24 +162,34 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 						keyType = AppConfig.PWD_ENCRYPT_RSA;
 					}
 					String token = getPublicKeyByUuidAndEncrypt(uuid, keyType);
+					if (StringUtils.isEmpty(token)) {
+						throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+						log.debug("签名验证失败");
+						return false;
+					}
 					if (SignTools.verifySign(map, signInfo, token)) {
 						log.debug("签名验证成功");
 						return true;
 					}
-					{
-						throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					else {
+						throwException(response, ResultFactory.ERR_PRARM);
 						log.debug("签名验证失败");
 						return false;
 					}
 				}
 				else {
 					String token = getTokenById(tokenId, userId, appId);
+					if (StringUtils.isEmpty(token)) {
+						throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+						log.debug("签名验证失败");
+						return false;
+					}
 					if (SignTools.verifySign(map, signInfo, token)) {
 						log.debug("签名验证成功");
 						return true;
 					}
-					{
-						throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					else {
+						throwException(response, ResultFactory.ERR_PRARM);
 						log.debug("签名验证失败");
 						return false;
 					}
@@ -363,24 +373,34 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 					keyType = AppConfig.PWD_ENCRYPT_RSA;
 				}
 				String token = getPublicKeyByUuidAndEncrypt(uuid, keyType);
+				if (StringUtils.isEmpty(token)) {
+					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					log.debug("签名验证失败");
+					return false;
+				}
 				if (SignTools.verifySign(jsonObject, token)) {
 					log.debug("签名验证成功");
 					return true;
 				}
-				{
-					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+				else {
+					throwException(response, ResultFactory.ERR_PRARM);
 					log.debug("签名验证失败");
 					return false;
 				}
 			}
 			else {
 				String token = getTokenById(tokenId, userId, appId);
+				if (StringUtils.isEmpty(token)) {
+					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+					log.debug("签名验证失败");
+					return false;
+				}
 				if (SignTools.verifySign(jsonObject, token)) {
 					log.debug("签名验证成功");
 					return true;
 				}
-				{
-					throwException(response, ResultFactory.ERR_TOKEN_INVALID);
+				else {
+					throwException(response, ResultFactory.ERR_PRARM);
 					log.debug("签名验证失败");
 					return false;
 				}
