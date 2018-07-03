@@ -13,6 +13,7 @@ import tk.mybatis.mapper.common.Mapper;
 
 public interface DbSequenceMapper extends Mapper<DbSequence> {
 
-	public Long getSeqNextval(@Param("seqName") String seqName);
+	// public Long getSeqNextval(@Param("seqName") String seqName);
+	public Long getSeqNextval(@Param("sqlStr") String sqlStr);
 
 }

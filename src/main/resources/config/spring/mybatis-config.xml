@@ -12,6 +12,8 @@
 		<!-- <setting name="logImpl" value="STDOUT_LOGGING"/> -->
 		<!-- 指定日志框架为LOG4J2 -->
 		<setting name="logImpl" value="LOG4J2" />
+		<!-- 设置但JDBC类型为空时,某些驱动程序 要指定值,default:OTHER --> 
+		<setting name="jdbcTypeForNull" value="NULL"/>  
 	</settings>
 	
 	<plugins>

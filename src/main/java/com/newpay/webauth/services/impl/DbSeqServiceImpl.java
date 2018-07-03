@@ -40,7 +40,10 @@ public class DbSeqServiceImpl implements DbSeqService {
 		}
 		else {
 			log.debug("数据库类型2：" + dbType);
-			long value = dbSequenceMapper.getSeqNextval(seqName);
+			String sqlStr = "select " + seqName + ".Nextval from dual";
+			long value = dbSequenceMapper.getSeqNextval(sqlStr);
+			// long value = dbSequenceMapper.getSeqNextval(seqName);
+			// int value = getSeqForMySQL(seqName, insertValue);
 			if (value > 0) {
 				return StringUtils.nullStrToEmpty(headerName) + value + "";
 			}
@@ -104,22 +107,22 @@ public class DbSeqServiceImpl implements DbSeqService {
 	@Override
 	public String getSystemLogNewPk() {
 		// TODO Auto-generated method stub
-		return getSeqByName("SYSTEM_LOG_NEW_PK", null, 100000);
+		return getSeqByName("SEQ_SYSTEM_LOG_NEW_PK", null, 100000);
 	}
 
 	@Override
 	public String getRMBankCardTempNewPK() {
-		return getSeqByName("RM_BANKCARD_TEMP_NEW_PK", null, 100000);
+		return getSeqByName("SEQ_RM_BANKCARD_TEMP_NEW_PK", null, 100000);
 	}
 
 	@Override
 	public String getRMBankCardNewPK() {
-		return getSeqByName("RM_BANKCARD_NEW_PK", null, 100000);
+		return getSeqByName("SEQ_RM_BANKCARD_NEW_PK", null, 100000);
 	}
 
 	@Override
 	public String getFeedBackNewPk() {
-		return getSeqByName("FEED_BACK_NEW_PK", null, 100000);
+		return getSeqByName("SEQ_FEED_BACK_NEW_PK", null, 100000);
 	}
 
 }
