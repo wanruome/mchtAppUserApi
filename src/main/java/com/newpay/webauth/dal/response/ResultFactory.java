@@ -38,7 +38,7 @@ public class ResultFactory {
 	public static String ERR_UNKNOWN = "e499";
 	// public static String ERROR_TOKEN_MISS = "e001";
 	// public static String ERROR_TOKEN_INVALID = "e000";
-	private static String SUCESS_CODE = "0000";
+	public static String SUCESS_CODE = "0000";
 
 	public static JSONObject toNackPARAM() {
 		return createResponse(ERR_PRARM, null, null, false);

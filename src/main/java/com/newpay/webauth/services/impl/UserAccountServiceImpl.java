@@ -232,9 +232,12 @@ public class UserAccountServiceImpl implements UserAccountService {
 			jsonObject.put("signInfo", tokenSignRSAMD5);
 			jsonObject.put("tokenList", lstTokenJsons);
 			jsonObject.put("token", tokenResponseParse.getTokenList());
-			JSONObject json = ResultFactory.toAck(jsonObject);
+			JSONObject resultJson = new JSONObject();
+			resultJson.put(ResultFactory.RESPONSE_COED_TAG, ResultFactory.SUCESS_CODE);
+			resultJson.put(ResultFactory.RESPONSE_MSG_TAG, "OK");
+			resultJson.put(ResultFactory.RESPONSE_DATA_TAG, jsonObject);
 			ResponseData responseData = new DataOKHttp().setUrl(resultLoginAppinfo.getNotifyUrl())
-					.setRequestBody(json.toJSONString()).setRequestBody("fads").doHttp(String.class);
+					.setRequestBody(resultJson.toJSONString()).doHttp(String.class);
 			if (null == responseData || responseData.getStatus() != HttpConfig.Code_Success) {
 				return ResultFactory.toNackCORE("应用授权登录失败，第三方服务器无响应");
 			}

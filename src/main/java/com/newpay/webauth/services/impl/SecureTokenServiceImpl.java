@@ -89,9 +89,10 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		// 查找有没有该UUID下面的设备，有的话不需要验证码登录
 		if (StringUtils.isEmpty(userInfoLoginReqDto.getMsgVerifyCode()) && !isUuidCanLogin) {
 			// 查看设备授权状态
-			JSONObject jsonResult = ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录");
+			// JSONObject jsonResult = ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE,
+			// "需要验证码登录");
 			if (null == resultUUIDToken) {
-				tokenResponseParse.setReturnResp(jsonResult);
+				tokenResponseParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录"));
 				return tokenResponseParse;
 			}
 			else {
@@ -99,14 +100,16 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 					long timeLastValidTime = AppConfig.SDF_DB_TIME.parse(resultUUIDToken.getValidTime()).getTime();
 					long timeSkip = new Date().getTime() - timeLastValidTime;
 					if (timeSkip > AppConfig.UserToken_DeleteTime()) {
-						tokenResponseParse.setReturnResp(jsonResult);
+						tokenResponseParse
+								.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录"));
 						return tokenResponseParse;
 					}
 				}
 				catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					tokenResponseParse.setReturnResp(jsonResult);
+					tokenResponseParse
+							.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录"));
 					return tokenResponseParse;
 				}
 
@@ -458,9 +461,11 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		// 查找有没有该UUID下面的设备，有的话不需要验证码登录
 		if (StringUtils.isEmpty(userInfoLoginReqDto.getMsgVerifyCode()) && !isUuidCanLogin) {
 			// 查看设备授权状态
-			JSONObject jsonResult = ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录");
+			// JSONObject jsonResult = ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE,
+			// "需要验证码登录");
+
 			if (null == resultUUIDToken) {
-				loginUuidParse.setReturnResp(jsonResult);
+				loginUuidParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录"));
 				return loginUuidParse;
 			}
 			else {
@@ -468,14 +473,15 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 					long timeLastValidTime = AppConfig.SDF_DB_TIME.parse(resultUUIDToken.getValidTime()).getTime();
 					long timeSkip = new Date().getTime() - timeLastValidTime;
 					if (timeSkip > AppConfig.UserToken_DeleteTime()) {
-						loginUuidParse.setReturnResp(jsonResult);
+						loginUuidParse
+								.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录"));
 						return loginUuidParse;
 					}
 				}
 				catch (ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-					loginUuidParse.setReturnResp(jsonResult);
+					loginUuidParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "需要验证码登录"));
 					return loginUuidParse;
 				}
 			}
