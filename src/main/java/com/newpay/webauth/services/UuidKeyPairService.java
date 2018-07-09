@@ -9,4 +9,7 @@ import com.newpay.webauth.dal.request.keypair.UuidKeyPairReqDto;
 
 public interface UuidKeyPairService {
 	public Object getPublicKeyByUuid(UuidKeyPairReqDto uuidKeyPairReqDto);
+
+	public Object getKeyPairForStore(UuidKeyPairReqDto uuidKeyPairReqDto);
+
 }

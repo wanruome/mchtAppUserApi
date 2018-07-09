@@ -52,11 +52,19 @@ public class MsgFunctionConfig {
 
 	}
 
-	public static void reload() {
+	public static void forceLoad() {
 		msgFunctionMap = null;
+		getAllMsgFunction();
 	}
+	//
+	// public static void reload() {
+	// msgFunctionMap = null;
+	// }
 
 	private static synchronized void getAllMsgFunction() {
+		if (null != msgFunctionMap) {
+			return;
+		}
 		try {
 			MsgFunctionInfoService msgFunctionInfoService = SpringContextHolder.getBean(MsgFunctionInfoService.class);
 			msgFunctionMap = msgFunctionInfoService.queryAllEnableMsgFunctionInfos();

@@ -243,7 +243,8 @@ public class UserAccountServiceImpl implements UserAccountService {
 			}
 		}
 		Map<String, String> resultData = new HashMap<>();
-		resultData.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId());
+		resultData.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId() + "_"
+				+ tokenResponseParse.getLoginUserToken().getVersion());
 		resultData.put("token", tokenResponseParse.getLoginUserToken().getToken());
 		resultData.put("validTime", tokenResponseParse.getLoginUserToken().getValidTime());
 		resultData.put("termType", tokenResponseParse.getLoginUserToken().getTermType() + "");

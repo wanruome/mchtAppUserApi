@@ -552,8 +552,11 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	}
 
 	public String getTokenById(String tokenId, String userId, String appId) {
+		String[] tokens = tokenId.split("_");
+		String realTokeId = tokens[0];
+		String tokenVersion = tokens[1];
 		LoginUserToken loginUserToken = new LoginUserToken();
-		loginUserToken.setTokenId(tokenId);
+		loginUserToken.setTokenId(realTokeId);
 		// loginUserToken.setAppId(appId);
 		// loginUserToken.setTokenId(tokenId);
 		LoginUserToken resultUserToken = loginUserTokenMapper.selectByPrimaryKey(loginUserToken);
@@ -566,10 +569,14 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		else if (!resultUserToken.getAppId().equals(appId)) {
 			return null;
 		}
+		else if (!tokenVersion.equals(resultUserToken.getVersion() + "")) {
+			return null;
+		}
 		String nowTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
 		if (nowTimeStr.compareTo(resultUserToken.getValidTime()) > 0) {
 			return null;
 		}
+
 		else {
 			return resultUserToken.getToken();
 		}

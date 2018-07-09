@@ -38,4 +38,16 @@ public class UuidKeyPairController {
 		return uuidKeyPairService.getPublicKeyByUuid(uuidKeyPairReqDto);
 
 	}
+
+	@ApiOperation("依据UUID获取RSA公钥")
+	@PostMapping("/getKeyPairForStore")
+	public Object getKeyPairForStore(@Valid @RequestBody UuidKeyPairReqDto uuidKeyPairReqDto,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+		return uuidKeyPairService.getKeyPairForStore(uuidKeyPairReqDto);
+
+	}
+
 }

@@ -395,10 +395,11 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		LoginUserToken queryToken = new LoginUserToken();
 		// queryToken.setUserId(userInfoLogout.getUserId());
 		// queryToken.setAppId(userInfoLogout.getAppId());
-		queryToken.setTokenId(userInfoLogout.getTokenId());
+		queryToken.setTokenId(userInfoLogout.getTokenId().split("_")[0]);
 		LoginUserToken resultToken = loginUserTokenMapper.selectOne(queryToken);
 		if (null == resultToken || resultToken.getLoginStatus() != 1) {
-			return ResultFactory.toNackCORE("用户已经退出了");
+			// return ResultFactory.toNackCORE("用户已经退出了");
+			return ResultFactory.toNack(ResultFactory.ERR_TOKEN_INVALID, "用户已经退出了");
 		}
 		else {
 			queryToken.setLoginStatus(0);
