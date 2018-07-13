@@ -27,6 +27,7 @@ import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
+import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwd;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.UserAccountService;
@@ -132,7 +133,7 @@ public class UserAccoutController {
 			return newPwdParse.getReturnResp();
 		}
 		if (!oldPwdParse.isValid()) {
-			return newPwdParse.getReturnResp();
+			return oldPwdParse.getReturnResp();
 		}
 		if (newPwdParse.getPwdParse().equals(oldPwdParse.getPwdParse())) {
 			return ResultFactory.toNackCORE("新密码不能和旧密码一致");
@@ -252,6 +253,22 @@ public class UserAccoutController {
 			return ResultFactory.toNackPARAM();
 		}
 		return userAccountService.doGetUserInfo(userAccountReqDto);
+	}
+
+	@ApiOperation("忘记锁屏密码")
+	@PostMapping("/doVerifyPassword")
+	public Object doVerifyPassword(@Valid @RequestBody UserInfoVerifyPwd userInfoVerifyPwd,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+		PwdRequestParse oldPwdParse = pwdService.parseRequsetPwd(userInfoVerifyPwd.getPwd(),
+				userInfoVerifyPwd.getPwdEncrypt(), userInfoVerifyPwd.getUuid());
+		if (!oldPwdParse.isValid()) {
+			return oldPwdParse.getReturnResp();
+		}
+		userInfoVerifyPwd.setPwd(oldPwdParse.getPwdParse());
+		return userAccountService.doVerifyPassword(userInfoVerifyPwd);
 	}
 
 }

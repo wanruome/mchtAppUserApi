@@ -40,6 +40,7 @@ import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
+import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwd;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.DbSeqService;
 import com.newpay.webauth.services.SecureTokenService;
@@ -491,6 +492,28 @@ public class UserAccountServiceImpl implements UserAccountService {
 		resultData.put("headImg", resultUserAccount.getHeadImg());
 		putIdCardInfo(resultData, resultUserAccount);
 		return ResultFactory.toAck(resultData);
+	}
+
+	@Override
+	public Object doVerifyPassword(UserInfoVerifyPwd userInfoVerifyPwd) {
+		LoginAppInfo queryLoginAppinfo = new LoginAppInfo();
+		queryLoginAppinfo.setAppId(userInfoVerifyPwd.getAppId());
+		LoginAppInfo resultLoginAppinfo = loginAppInfoMapper.selectByPrimaryKey(queryLoginAppinfo);
+		if (null == resultLoginAppinfo || resultLoginAppinfo.getStatus() != 1) {
+			return ResultFactory.toNackCORE("密码验证失败，应用授权失败");
+		}
+		LoginUserAccount dbLoginUserAccount = queryLoginUserAccount(userInfoVerifyPwd.getUserId());
+		if (null == dbLoginUserAccount) {
+			return ResultFactory.toNackCORE("密码验证失败，用户不存在");
+		}
+		PwdErrParse pwdErrParse = parseErrCount(dbLoginUserAccount, userInfoVerifyPwd.getPwd(),
+				userInfoVerifyPwd.getUuid(), "密码");
+		if (!pwdErrParse.isValid()) {
+			return pwdErrParse.getReturnResp();
+		}
+		else {
+			return ResultFactory.toAck(null);
+		}
 	}
 
 	@Override
