@@ -199,10 +199,10 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 				return pwdErrParse.getReturnResp();
 			}
 		}
-		if (!StringUtils.isEmpty(payInfoNoPwdFlagRepDto.getPayPwd())) {
+		if (!StringUtils.isEmpty(payInfoNoPwdFlagRepDto.getPwd())) {
 			UserAccountService userAccountService = SpringContextHolder.getBean(UserAccountService.class);
-			PwdErrParse pwdErrParse = userAccountService.parseErrCount(payInfoNoPwdFlagRepDto.getAppId(),
-					payInfoNoPwdFlagRepDto.getPayPwd(), payInfoNoPwdFlagRepDto.getUuid(), "用户密码");
+			PwdErrParse pwdErrParse = userAccountService.parseErrCount(payInfoNoPwdFlagRepDto.getUserId(),
+					payInfoNoPwdFlagRepDto.getPwd(), payInfoNoPwdFlagRepDto.getUuid(), "用户密码");
 			if (!pwdErrParse.isValid()) {
 				return pwdErrParse.getReturnResp();
 			}

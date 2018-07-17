@@ -145,7 +145,7 @@ public class RepayMentPayInfoController {
 			// }
 			payInfoNoPwdFlagRepDto.setPayPwd(newPwdParse.getPwdParse());
 		}
-		if (!StringUtils.isNotEmpty(payInfoNoPwdFlagRepDto.getPayPwd())) {
+		if (!StringUtils.isEmpty(payInfoNoPwdFlagRepDto.getPwd())) {
 			PwdRequestParse newPwdParse = pwdService.parseRequsetPwd(payInfoNoPwdFlagRepDto.getPwd(),
 					payInfoNoPwdFlagRepDto.getPwdEncrypt(), payInfoNoPwdFlagRepDto.getUuid());
 			if (!newPwdParse.isValid()) {
