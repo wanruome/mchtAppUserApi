@@ -40,7 +40,7 @@ import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
-import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwd;
+import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwdDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.DbSeqService;
 import com.newpay.webauth.services.SecureTokenService;
@@ -495,7 +495,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 	}
 
 	@Override
-	public Object doVerifyPassword(UserInfoVerifyPwd userInfoVerifyPwd) {
+	public Object doVerifyPassword(UserInfoVerifyPwdDto userInfoVerifyPwd) {
 		LoginAppInfo queryLoginAppinfo = new LoginAppInfo();
 		queryLoginAppinfo.setAppId(userInfoVerifyPwd.getAppId());
 		LoginAppInfo resultLoginAppinfo = loginAppInfoMapper.selectByPrimaryKey(queryLoginAppinfo);

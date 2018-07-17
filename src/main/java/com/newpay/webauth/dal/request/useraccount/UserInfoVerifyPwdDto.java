@@ -10,7 +10,7 @@ import javax.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class UserInfoVerifyPwd {
+public class UserInfoVerifyPwdDto {
 	@NotEmpty
 	private String uuid;
 	@NotEmpty

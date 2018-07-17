@@ -20,6 +20,7 @@ import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoFindPayPwdReqDto;
 import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoNoPwdFlagRepDto;
 import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoPayModifyPayPwdReqDto;
 import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoPayPwdSetReqDto;
+import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoVerifyPwdDto;
 import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
@@ -145,5 +146,21 @@ public class RepayMentPayInfoController {
 			payInfoNoPwdFlagRepDto.setPayPwd(newPwdParse.getPwdParse());
 		}
 		return repayMentPayInfoService.doModifyNoPwdFlag(payInfoNoPwdFlagRepDto);
+	}
+
+	@ApiOperation("验证支付密码")
+	@PostMapping("/doVerifyPassword")
+	public Object doVerifyPassword(@Valid @RequestBody PayInfoVerifyPwdDto payInfoVerifyPwdDto,
+			BindingResult bindingResult) {
+		if (null == bindingResult || bindingResult.hasErrors()) {
+			return ResultFactory.toNackPARAM();
+		}
+		PwdRequestParse oldPwdParse = pwdService.parseRequsetPwd(payInfoVerifyPwdDto.getPayPwd(),
+				payInfoVerifyPwdDto.getPayPwdEncrypt(), payInfoVerifyPwdDto.getUuid());
+		if (!oldPwdParse.isValid()) {
+			return oldPwdParse.getReturnResp();
+		}
+		payInfoVerifyPwdDto.setPayPwd(oldPwdParse.getPwdParse());
+		return repayMentPayInfoService.doVerifyPassword(payInfoVerifyPwdDto);
 	}
 }

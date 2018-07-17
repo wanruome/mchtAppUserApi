@@ -15,7 +15,7 @@ import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
-import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwd;
+import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwdDto;
 
 public interface UserAccountService {
 	public Object doLogin(UserInfoLoginReqDto userInfoLoginReqDto);
@@ -38,5 +38,5 @@ public interface UserAccountService {
 
 	public Object doModifyUserInfo(UserInfoModifyOther userInfoModifyOther);
 
-	public Object doVerifyPassword(UserInfoVerifyPwd userInfoVerifyPwd);
+	public Object doVerifyPassword(UserInfoVerifyPwdDto userInfoVerifyPwd);
 }

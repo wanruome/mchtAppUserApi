@@ -23,6 +23,7 @@ import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoFindPayPwdReqDto;
 import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoNoPwdFlagRepDto;
 import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoPayModifyPayPwdReqDto;
 import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoPayPwdSetReqDto;
+import com.newpay.webauth.dal.request.repaymentpayinfo.PayInfoVerifyPwdDto;
 import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
@@ -310,6 +311,29 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 			}
 		}
 
+	}
+
+	@Override
+	public Object doVerifyPassword(PayInfoVerifyPwdDto payInfoVerifyPwdDto) {
+		RepayMentPayInfo queryPayInfo = new RepayMentPayInfo();
+		queryPayInfo.setUserId(payInfoVerifyPwdDto.getUserId());
+		RepayMentPayInfo resultPayInfo = repayMentPayInfoMapper.selectByPrimaryKey(queryPayInfo);
+		if (null == resultPayInfo) {
+			return ResultFactory.toNackCORE();
+		}
+		else if (StringUtils.isEmpty(resultPayInfo.getPayPwd())) {
+			return ResultFactory.toNackCORE("没有设置支付密码，请先设置支付密码");
+		}
+
+		PwdErrParse pwdErrParse = parseErrCount(resultPayInfo, payInfoVerifyPwdDto.getPayPwd(),
+				payInfoVerifyPwdDto.getUuid(), "支付密码");
+		if (!pwdErrParse.isValid()) {
+			return pwdErrParse.getReturnResp();
+
+		}
+		else {
+			return ResultFactory.toAck(null);
+		}
 	}
 
 	public static String parseErrTimeRespnseToString(long errTime) {

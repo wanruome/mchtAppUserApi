@@ -27,7 +27,7 @@ import com.newpay.webauth.dal.request.useraccount.UserInfoModifyName;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyOther;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoRegisterReqDto;
-import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwd;
+import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwdDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.UserAccountService;
@@ -255,9 +255,9 @@ public class UserAccoutController {
 		return userAccountService.doGetUserInfo(userAccountReqDto);
 	}
 
-	@ApiOperation("忘记锁屏密码")
+	@ApiOperation("验证用户密码")
 	@PostMapping("/doVerifyPassword")
-	public Object doVerifyPassword(@Valid @RequestBody UserInfoVerifyPwd userInfoVerifyPwd,
+	public Object doVerifyPassword(@Valid @RequestBody UserInfoVerifyPwdDto userInfoVerifyPwd,
 			BindingResult bindingResult) {
 		if (null == bindingResult || bindingResult.hasErrors()) {
 			return ResultFactory.toNackPARAM();
