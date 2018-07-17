@@ -598,6 +598,23 @@ public class UserAccountServiceImpl implements UserAccountService {
 	// }
 	//
 	// }
+	@Override
+	public PwdErrParse parseErrCount(String loginUserId, String pwd, String uuid, String pwdTag) {
+		if (StringUtils.isEmpty(loginUserId)) {
+			PwdErrParse pwdErrParse = new PwdErrParse();
+			pwdErrParse.setValid(false);
+			pwdErrParse.setReturnResp(ResultFactory.toNackCORE("密码验证失败，用户不存在"));
+			return pwdErrParse;
+		}
+		LoginUserAccount dbLoginUserAccount = queryLoginUserAccount(loginUserId);
+		if (null == dbLoginUserAccount) {
+			PwdErrParse pwdErrParse = new PwdErrParse();
+			pwdErrParse.setValid(false);
+			pwdErrParse.setReturnResp(ResultFactory.toNackCORE("密码验证失败，用户不存在"));
+			return pwdErrParse;
+		}
+		return parseErrCount(dbLoginUserAccount, pwd, uuid, pwdTag);
+	};
 
 	private PwdErrParse parseErrCount(LoginUserAccount resultLoginUserAccount, String pwd, String uuid, String pwdTag) {
 		String pwdRemark = StringUtils.isEmpty(pwdTag) ? "密码" : pwdTag;

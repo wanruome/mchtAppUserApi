@@ -139,11 +139,23 @@ public class RepayMentPayInfoController {
 			if (!newPwdParse.isValid()) {
 				return newPwdParse.getReturnResp();
 			}
-			PwdRuleParse pwdRuleParse = pwdService.parsePayPwdRule(newPwdParse.getPwdClear());
-			if (!pwdRuleParse.isValid()) {
-				return pwdRuleParse.getReturnResp();
-			}
+			// PwdRuleParse pwdRuleParse = pwdService.parsePayPwdRule(newPwdParse.getPwdClear());
+			// if (!pwdRuleParse.isValid()) {
+			// return pwdRuleParse.getReturnResp();
+			// }
 			payInfoNoPwdFlagRepDto.setPayPwd(newPwdParse.getPwdParse());
+		}
+		if (!StringUtils.isNotEmpty(payInfoNoPwdFlagRepDto.getPayPwd())) {
+			PwdRequestParse newPwdParse = pwdService.parseRequsetPwd(payInfoNoPwdFlagRepDto.getPwd(),
+					payInfoNoPwdFlagRepDto.getPwdEncrypt(), payInfoNoPwdFlagRepDto.getUuid());
+			if (!newPwdParse.isValid()) {
+				return newPwdParse.getReturnResp();
+			}
+			// PwdRuleParse pwdRuleParse = pwdService.parsePayPwdRule(newPwdParse.getPwdClear());
+			// if (!pwdRuleParse.isValid()) {
+			// return pwdRuleParse.getReturnResp();
+			// }
+			payInfoNoPwdFlagRepDto.setPwd(newPwdParse.getPwdParse());
 		}
 		return repayMentPayInfoService.doModifyNoPwdFlag(payInfoNoPwdFlagRepDto);
 	}

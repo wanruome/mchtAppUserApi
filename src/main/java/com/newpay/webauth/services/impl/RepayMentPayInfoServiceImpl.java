@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.base.mchtApi.util.repayment.util.RepayMentConstant;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.EncryptConfig;
+import com.newpay.webauth.config.listener.SpringContextHolder;
 import com.newpay.webauth.dal.core.PwdErrParse;
 import com.newpay.webauth.dal.mapper.RepayMentPayInfoMapper;
 import com.newpay.webauth.dal.model.RepayMentPayInfo;
@@ -28,6 +29,7 @@ import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.RepayMentPayInfoService;
+import com.newpay.webauth.services.UserAccountService;
 import com.ruomm.base.tools.StringUtils;
 import com.ruomm.base.tools.TimeUtils;
 
@@ -193,6 +195,14 @@ public class RepayMentPayInfoServiceImpl implements RepayMentPayInfoService {
 		if (!StringUtils.isEmpty(payInfoNoPwdFlagRepDto.getPayPwd())) {
 			PwdErrParse pwdErrParse = parseErrCount(resultPayInfo, payInfoNoPwdFlagRepDto.getPayPwd(),
 					payInfoNoPwdFlagRepDto.getUuid(), "支付密码");
+			if (!pwdErrParse.isValid()) {
+				return pwdErrParse.getReturnResp();
+			}
+		}
+		if (!StringUtils.isEmpty(payInfoNoPwdFlagRepDto.getPayPwd())) {
+			UserAccountService userAccountService = SpringContextHolder.getBean(UserAccountService.class);
+			PwdErrParse pwdErrParse = userAccountService.parseErrCount(payInfoNoPwdFlagRepDto.getAppId(),
+					payInfoNoPwdFlagRepDto.getPayPwd(), payInfoNoPwdFlagRepDto.getUuid(), "用户密码");
 			if (!pwdErrParse.isValid()) {
 				return pwdErrParse.getReturnResp();
 			}

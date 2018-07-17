@@ -5,6 +5,7 @@
  */
 package com.newpay.webauth.services;
 
+import com.newpay.webauth.dal.core.PwdErrParse;
 import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
 import com.newpay.webauth.dal.request.useraccount.UserInfoFindPwd;
 import com.newpay.webauth.dal.request.useraccount.UserInfoLoginReqDto;
@@ -39,4 +40,6 @@ public interface UserAccountService {
 	public Object doModifyUserInfo(UserInfoModifyOther userInfoModifyOther);
 
 	public Object doVerifyPassword(UserInfoVerifyPwdDto userInfoVerifyPwd);
+
+	public PwdErrParse parseErrCount(String loginUserId, String pwd, String uuid, String pwdTag);
 }

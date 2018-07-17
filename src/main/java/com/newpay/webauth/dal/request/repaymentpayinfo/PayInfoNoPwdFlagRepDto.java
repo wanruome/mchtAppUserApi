@@ -27,4 +27,8 @@ public class PayInfoNoPwdFlagRepDto {
 	private String payPwd;
 
 	private String payPwdEncrypt;
+
+	private String pwd;
+
+	private String pwdEncrypt;
 }
