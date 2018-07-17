@@ -123,9 +123,25 @@ public class MsgSendServiceImpl implements MsgSendService {
 	}
 
 	public Object doSendMsgAuthType2(MsgSendReqDto msgSendReqDto, MsgFunctionInfo msgFunctionInfo) {
-
+		// 若是手机或邮箱和用户的手机号邮箱不同，需要先获取对应功能的msgToken才能往不同的手机或邮箱发送验证码
+		LoginUserAccount queryUserAccount = new LoginUserAccount();
+		queryUserAccount.setLoginId(msgSendReqDto.getUserId());
+		queryUserAccount.setStatus(1);
+		LoginUserAccount resultUserAccout = loginUserAccountMapper.selectOne(queryUserAccount);
+		if (null == resultUserAccout) {
+			return ResultFactory.toNackCORE("用户不存在");
+		}
+		if ("1".equals(msgSendReqDto.getMsgAddr())) {
+			msgSendReqDto.setMsgAddr(resultUserAccout.getLoginMobile());
+		}
+		if ("2".equals(msgSendReqDto.getMsgAddr())) {
+			msgSendReqDto.setMsgAddr(resultUserAccout.getLoginEmail());
+		}
 		boolean isEmail = RegexUtil.doRegex(msgSendReqDto.getMsgAddr(), RegexUtil.EMAILS);
 		boolean isMobile = RegexUtil.doRegex(msgSendReqDto.getMsgAddr(), RegexUtil.MOBILE_NUM);
+		if (!isEmail && !isMobile) {
+			return ResultFactory.toNackPARAM();
+		}
 		if (!isEmail && !isMobile) {
 			return ResultFactory.toNackPARAM();
 		}
@@ -144,14 +160,6 @@ public class MsgSendServiceImpl implements MsgSendService {
 		}
 		String msgUUID = msgSendReqDto.getUserId();
 		boolean isSameToUserInfoAddr = false;
-		// 若是手机或邮箱和用户的手机号邮箱不同，需要先获取对应功能的msgToken才能往不同的手机或邮箱发送验证码
-		LoginUserAccount queryUserAccount = new LoginUserAccount();
-		queryUserAccount.setLoginId(msgSendReqDto.getUserId());
-		queryUserAccount.setStatus(1);
-		LoginUserAccount resultUserAccout = loginUserAccountMapper.selectOne(queryUserAccount);
-		if (null == resultUserAccout) {
-			return ResultFactory.toNackCORE("用户不存在");
-		}
 		if (isEmail) {
 			isSameToUserInfoAddr = msgSendReqDto.getMsgAddr().equals(resultUserAccout.getLoginEmail());
 		}
@@ -238,12 +246,25 @@ public class MsgSendServiceImpl implements MsgSendService {
 	}
 
 	public Object doSendMsgAuthType1(MsgSendReqDto msgSendReqDto, MsgFunctionInfo msgFunctionInfo) {
+		// 若是手机或邮箱和用户的手机号邮箱不同，需要先获取对应功能的msgToken才能往不同的手机或邮箱发送验证码
+		LoginUserAccount queryUserAccount = new LoginUserAccount();
+		queryUserAccount.setLoginId(msgSendReqDto.getUserId());
+		queryUserAccount.setStatus(1);
+		LoginUserAccount resultUserAccout = loginUserAccountMapper.selectOne(queryUserAccount);
+		if (null == resultUserAccout) {
+			return ResultFactory.toNackCORE("用户不存在");
+		}
+		if ("1".equals(msgSendReqDto.getMsgAddr())) {
+			msgSendReqDto.setMsgAddr(resultUserAccout.getLoginMobile());
+		}
+		if ("2".equals(msgSendReqDto.getMsgAddr())) {
+			msgSendReqDto.setMsgAddr(resultUserAccout.getLoginEmail());
+		}
 		boolean isEmail = RegexUtil.doRegex(msgSendReqDto.getMsgAddr(), RegexUtil.EMAILS);
 		boolean isMobile = RegexUtil.doRegex(msgSendReqDto.getMsgAddr(), RegexUtil.MOBILE_NUM);
 		if (!isEmail && !isMobile) {
 			return ResultFactory.toNackPARAM();
 		}
-
 		if (StringUtils.isEmpty(msgSendReqDto.getUserId()) || StringUtils.isEmpty(msgSendReqDto.getTokenId())
 				|| StringUtils.isEmpty(msgSendReqDto.getSignInfo())) {
 			return ResultFactory.toNackPARAM();
@@ -254,14 +275,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 		MsgAuthInfo tokenMsgAuthInfo = null;
 		String msgUUID = msgSendReqDto.getUserId();
 		boolean isSameToUserInfoAddr = false;
-		// 若是手机或邮箱和用户的手机号邮箱不同，需要先获取对应功能的msgToken才能往不同的手机或邮箱发送验证码
-		LoginUserAccount queryUserAccount = new LoginUserAccount();
-		queryUserAccount.setLoginId(msgSendReqDto.getUserId());
-		queryUserAccount.setStatus(1);
-		LoginUserAccount resultUserAccout = loginUserAccountMapper.selectOne(queryUserAccount);
-		if (null == resultUserAccout) {
-			return ResultFactory.toNackCORE("用户不存在");
-		}
+
 		if (isEmail) {
 			isSameToUserInfoAddr = msgSendReqDto.getMsgAddr().equals(resultUserAccout.getLoginEmail());
 		}

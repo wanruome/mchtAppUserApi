@@ -82,13 +82,23 @@ public class BaseWebUtils {
 			// 严格匹配
 			// realUri = uri.substring(0, indexW);
 			// 通用匹配
-			realUri = uri.substring(0, indexW).replaceAll("[/]+", "/").replaceFirst(":/", "://");
+			realUri = uri.substring(0, indexW).replaceAll("\\\\", "/").replaceAll("[/]+", "/").replaceFirst(":/",
+					"://");
+			if (realUri.endsWith("/")) {
+				int length = realUri.length();
+				realUri = realUri.substring(0, length - 1);
+			}
 		}
 		else {
 			// 严格匹配
 			// realUri = uri;
 			// 通用匹配
-			realUri = uri.replaceAll("[/]+", "/").replaceFirst(":/", "://");
+
+			realUri = uri.replaceAll("\\\\", "/").replaceAll("[/]+", "/").replaceFirst(":/", "://");
+			if (realUri.endsWith("/")) {
+				int length = realUri.length();
+				realUri = realUri.substring(0, length - 1);
+			}
 		}
 		return realUri;
 	}

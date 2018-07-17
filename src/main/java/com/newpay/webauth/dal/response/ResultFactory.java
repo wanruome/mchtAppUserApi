@@ -113,7 +113,7 @@ public class ResultFactory {
 					realMsg = "无效的请求信息";
 				}
 				else if (realCode.equals(ERR_TOKEN_INVALID)) {
-					realMsg = "签名信息不正确";
+					realMsg = "登录已失效，请重新登录";
 				}
 				else if (realCode.equals(ERR_MSGCODE_INVALID)) {
 					realMsg = "短信验证码不正确";
