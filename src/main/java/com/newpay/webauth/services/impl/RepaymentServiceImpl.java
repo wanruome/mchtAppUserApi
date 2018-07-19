@@ -250,7 +250,9 @@ public class RepaymentServiceImpl implements RepaymentService {
 				RepayMentConstant.REPAYMENT_MCHT_PRIVATEKEY_PATH, RepayMentConstant.REPAYMENT_MCHT_PRIVATEKEY_PWD,
 				RepayMentConstant.REPAYMENT_EASY_PUBLICKEY_PATH);
 		// responseMap = RepeyMentTest.createUnBind();
-		if (RepayMentConfig.RES_SUCCESS.equals(responseMap.getString("responseCode"))) {
+		if (RepayMentConfig.RES_SUCCESS.equals(responseMap.getString("responseCode"))
+				|| ("E000".equals(responseMap.getString("responseCode"))
+						&& "绑定信息不存在".equals(responseMap.getString("responseRemark")))) {
 
 			RepayMentBankCard repayMentBankCard = new RepayMentBankCard();
 			repayMentBankCard.setCardIndex(resultBankCard.getCardIndex());
@@ -329,7 +331,7 @@ public class RepaymentServiceImpl implements RepaymentService {
 				insertCard.setCreateTime(resultBankCard.getCreateTime());
 				insertCard.setCardFinger(cardFinger);
 				insertCard.setVersion(resultBankCard.getVersion());
-				dbResult = repayMentBankCardMapper.updateByPrimaryKey(resultBankCard);
+				dbResult = repayMentBankCardMapper.updateByPrimaryKey(insertCard);
 			}
 			if (dbResult > 0) {
 				return ResultFactory.toAck(responseMap);
