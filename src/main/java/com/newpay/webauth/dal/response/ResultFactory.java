@@ -28,6 +28,7 @@ public class ResultFactory {
 	public static String ERR_PWD_WRONG = "e404";
 	public static String ERR_PWD_PARSE = "e405";
 	public static String ERR_FILE_NOFIND = "e406";
+	public static String ERR_DATA_PARSE = "e407";
 	public static String ERR_NEED_VERIFYCODE = "e409";
 	public static String ERR_PARSE_REQUEST = "e410";
 	public static String ERR_TOKEN_INVALID = "e411";
@@ -105,6 +106,9 @@ public class ResultFactory {
 				}
 				else if (realCode.equals(ERR_PWD_PARSE)) {
 					realMsg = "密码解析错误";
+				}
+				else if (realCode.equals(ERR_DATA_PARSE)) {
+					realMsg = "数据解析错误";
 				}
 				else if (realCode.equals(ERR_NEED_VERIFYCODE)) {
 					realMsg = "需求验证码操作";

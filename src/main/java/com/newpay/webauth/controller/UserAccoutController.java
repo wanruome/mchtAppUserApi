@@ -74,8 +74,8 @@ public class UserAccoutController {
 			}
 		}
 		if (!StringUtils.isEmpty(userInfoRegister.getNickName())) {
-			if (userInfoRegister.getNickName().length() > 16) {
-				return ResultFactory.toNackPARAM("昵称不能超过16位");
+			if (userInfoRegister.getNickName().length() > 30) {
+				return ResultFactory.toNackPARAM("昵称不能超过30位");
 			}
 		}
 		if (!StringUtils.isEmpty(userInfoRegister.getHeadImg())) {
@@ -234,8 +234,8 @@ public class UserAccoutController {
 			}
 		}
 		if (!StringUtils.isEmpty(userInfoModifyOther.getNickName())) {
-			if (userInfoModifyOther.getNickName().length() > 16) {
-				return ResultFactory.toNackPARAM("昵称不能超过16位");
+			if (userInfoModifyOther.getNickName().length() > 30) {
+				return ResultFactory.toNackPARAM("昵称不能超过30位");
 			}
 		}
 		if (!StringUtils.isEmpty(userInfoModifyOther.getHeadImg())) {

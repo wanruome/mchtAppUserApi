@@ -5,6 +5,7 @@
  */
 package com.newpay.webauth.services;
 
+import com.newpay.webauth.dal.core.DataEncryptPrase;
 import com.newpay.webauth.dal.core.PwdRequestParse;
 import com.newpay.webauth.dal.core.PwdRuleParse;
 
@@ -14,4 +15,6 @@ public interface PwdService {
 	public PwdRuleParse parsePayPwdRule(String pwd);
 
 	public PwdRequestParse parseRequsetPwd(String pwdRequest, String pwdEncrypt, String pwdUuid);
+
+	public DataEncryptPrase parseRequsetData(String data, String dataEncrypt, String dataUuid);
 }

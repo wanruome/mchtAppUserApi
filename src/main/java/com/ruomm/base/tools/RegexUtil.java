@@ -17,6 +17,7 @@ public class RegexUtil {
 	public static final String EMAILS = "^[a-zA-Z0-9_\\-\\.]+@([a-zA-Z0-9_\\-]+\\.){1,3}[a-zA-Z0-9_\\-]{2,6}$";
 	public static final String ISBirthday = "^(19|20)\\d{2}-(1[0-2]|0?[1-9])-(0?[1-9]|[1-2][0-9]|3[0-1])$";
 	public static final String CarPlatenumber = "^[\\u4E00-\\u9FA5][a-zA-Z][\\da-zA-Z]{5}$";
+	public static final String BANKCARD = "^\\d{8,20}$";
 	// 本应用
 	public static final String OPERATOR_PASSWORD = "^[!-~]{6,16}$";
 	public static final String APP_LOGIN_NAME = "^[a-zA-Z][a-zA-Z0-9\\_\\-]{3,31}$";

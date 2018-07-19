@@ -14,6 +14,8 @@ import lombok.Data;
 @Data
 public class RepaymentBindCardReqDto {
 	@NotEmpty
+	private String uuid;
+	@NotEmpty
 	private String userId;
 	@NotEmpty
 	private String appId;
@@ -22,7 +24,7 @@ public class RepaymentBindCardReqDto {
 	@NotEmpty
 	private String signInfo;
 	@NotEmpty
-	@Length(min = 8, max = 20)
+
 	private String accountNo;
 	@NotEmpty
 	@Length(min = 8, max = 15)
@@ -31,5 +33,6 @@ public class RepaymentBindCardReqDto {
 	private String area;
 	private String idcardNo;
 	private String name;
+	private String dataEncrypt;
 
 }

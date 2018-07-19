@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.newpay.webauth.config.AppConfig;
+import com.newpay.webauth.dal.core.DataEncryptPrase;
 import com.newpay.webauth.dal.core.PwdRequestParse;
 import com.newpay.webauth.dal.core.PwdRuleParse;
 import com.newpay.webauth.dal.mapper.UuidKeyPairMapper;
@@ -416,6 +417,44 @@ public class PwdServiceImpl implements PwdService {
 			pwdParse.setReturnResp(ResultFactory.toNackPARAM());
 			return pwdParse;
 		}
+	}
+
+	@Override
+	public DataEncryptPrase parseRequsetData(String data, String dataEncrypt, String dataUuid) {
+		DataEncryptPrase dataEncryptPrase = new DataEncryptPrase();
+		if (StringUtils.isEmpty(dataEncrypt)) {
+			dataEncryptPrase.setValid(true);
+			dataEncryptPrase.setDataClear(data);
+			return dataEncryptPrase;
+		}
+		if (StringUtils.isEmpty(data)) {
+			dataEncryptPrase.setValid(true);
+			dataEncryptPrase.setDataClear(data);
+			return dataEncryptPrase;
+		}
+		if (StringUtils.isEmpty(dataUuid)) {
+			dataEncryptPrase.setValid(false);
+			dataEncryptPrase.setDataClear(data);
+			return dataEncryptPrase;
+		}
+		if (!"RSA".equals(dataEncrypt) && !"3DES".equals(dataEncrypt)) {
+			dataEncryptPrase.setValid(false);
+			dataEncryptPrase.setDataClear(data);
+			return dataEncryptPrase;
+		}
+
+		String dataClear = getPwdByRsaOr3Des(data, dataEncrypt, dataUuid);
+		if (StringUtils.isEmpty(dataClear)) {
+			dataEncryptPrase.setValid(false);
+			dataEncryptPrase.setDataClear(dataClear);
+			return dataEncryptPrase;
+		}
+		else {
+			dataEncryptPrase.setValid(true);
+			dataEncryptPrase.setDataClear(dataClear);
+			return dataEncryptPrase;
+		}
+
 	}
 
 }

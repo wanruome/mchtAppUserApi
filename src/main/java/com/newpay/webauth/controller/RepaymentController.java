@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.newpay.webauth.dal.core.DataEncryptPrase;
 import com.newpay.webauth.dal.request.repayment.RepaymentBindCardReqDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQrCodeCallDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryBindCardDto;
@@ -27,7 +28,9 @@ import com.newpay.webauth.dal.request.repayment.RepaymentQueryCitysDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentQueryOrdersDto;
 import com.newpay.webauth.dal.request.repayment.RepaymentUnBindCardReqDto;
 import com.newpay.webauth.dal.response.ResultFactory;
+import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.RepaymentService;
+import com.ruomm.base.tools.StringUtils;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 public class RepaymentController {
 	@Autowired
 	RepaymentService repaymentService;
+	@Autowired
+	PwdService pwdService;
 
 	@ApiOperation("银联绑定银行卡调用")
 	@PostMapping("/doBindCard")
@@ -46,7 +51,17 @@ public class RepaymentController {
 		if (null == bindingResult || bindingResult.hasErrors()) {
 			return ResultFactory.toNackPARAM();
 		}
+		DataEncryptPrase dataEncryptPrase = pwdService.parseRequsetData(repaymentBindCardReqDto.getAccountNo(),
+				repaymentBindCardReqDto.getDataEncrypt(), repaymentBindCardReqDto.getUuid());
+		if (null == dataEncryptPrase || !dataEncryptPrase.isValid()) {
+			return ResultFactory.toNack(ResultFactory.ERR_DATA_PARSE, null);
+		}
+		int length = StringUtils.getLength(dataEncryptPrase.getDataClear());
+		if (length < 8 || length > 20) {
 
+			return ResultFactory.toNackPARAM("银行卡号必须8-20位");
+		}
+		repaymentBindCardReqDto.setAccountNo(dataEncryptPrase.getDataClear());
 		return repaymentService.doBindCard(repaymentBindCardReqDto);
 	}
 
