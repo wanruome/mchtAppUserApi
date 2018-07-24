@@ -50,7 +50,8 @@ public class SignTools {
 				continue;
 			}
 			if (strVal.startsWith("{") && strVal.endsWith("}")) {
-				continue;
+				hashMap.put(key, strVal);
+				// continue;
 			}
 			if (strVal.startsWith("[") && strVal.endsWith("]")) {
 				continue;

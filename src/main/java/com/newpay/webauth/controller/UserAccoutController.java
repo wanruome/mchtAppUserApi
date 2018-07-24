@@ -5,6 +5,7 @@
  */
 package com.newpay.webauth.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,8 @@ import com.newpay.webauth.dal.request.useraccount.UserInfoVerifyPwdDto;
 import com.newpay.webauth.dal.response.ResultFactory;
 import com.newpay.webauth.services.PwdService;
 import com.newpay.webauth.services.UserAccountService;
-import com.ruomm.base.tools.BaseWebUtils;
 import com.ruomm.base.tools.IDCardUtils;
+import com.ruomm.base.tools.IPUtils;
 import com.ruomm.base.tools.StringUtils;
 
 import io.swagger.annotations.ApiOperation;
@@ -104,12 +105,13 @@ public class UserAccoutController {
 
 	@ApiOperation("用户登录")
 	@PostMapping("/doLogin")
-	public Object doLogin(@Valid @RequestBody UserInfoLoginReqDto userInfoLoginReqDto, BindingResult bindingResult) {
+	public Object doLogin(HttpServletRequest request, @Valid @RequestBody UserInfoLoginReqDto userInfoLoginReqDto,
+			BindingResult bindingResult) {
 		if (null == bindingResult || bindingResult.hasErrors()) {
 			return ResultFactory.toNackPARAM();
 		}
-		BaseWebUtils.getClassesRoot();
-		BaseWebUtils.getWwwroot();
+		String ip = IPUtils.getRequestIP(request);
+		userInfoLoginReqDto.setIp(ip);
 		PwdRequestParse pwdParse = pwdService.parseRequsetPwd(userInfoLoginReqDto.getPwd(),
 				userInfoLoginReqDto.getPwdEncrypt(), userInfoLoginReqDto.getUuid());
 		if (!pwdParse.isValid()) {

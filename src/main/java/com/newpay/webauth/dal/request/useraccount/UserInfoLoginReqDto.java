@@ -30,4 +30,8 @@ public class UserInfoLoginReqDto {
 	@NotEmpty
 	private String pwdEncrypt;
 	private String msgVerifyCode;
+	private String lat;
+	private String lng;
+	private String termInfo;
+	private String ip;
 }

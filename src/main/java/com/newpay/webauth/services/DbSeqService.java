@@ -21,4 +21,6 @@ public interface DbSeqService {
 	public String getRMBankCardNewPK();
 
 	public String getFeedBackNewPk();
+
+	public String getLoginTermInfoNewPk();
 }

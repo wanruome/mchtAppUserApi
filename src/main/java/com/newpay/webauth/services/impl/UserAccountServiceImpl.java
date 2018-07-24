@@ -22,12 +22,15 @@ import com.newpay.webauth.aop.SystemLogThreadLocal;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.EncryptConfig;
 import com.newpay.webauth.config.util.StringMask;
+import com.newpay.webauth.dal.core.LocationParse;
 import com.newpay.webauth.dal.core.LoginUuidParse;
 import com.newpay.webauth.dal.core.PwdErrParse;
 import com.newpay.webauth.dal.core.TokenResponseParse;
 import com.newpay.webauth.dal.mapper.LoginAppInfoMapper;
+import com.newpay.webauth.dal.mapper.LoginTermInfoMapper;
 import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
 import com.newpay.webauth.dal.model.LoginAppInfo;
+import com.newpay.webauth.dal.model.LoginTermInfo;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.request.useraccount.UserAccountReqDto;
@@ -48,6 +51,7 @@ import com.newpay.webauth.services.UserAccountService;
 import com.ruomm.base.http.HttpConfig;
 import com.ruomm.base.http.ResponseData;
 import com.ruomm.base.http.okhttp.DataOKHttp;
+import com.ruomm.base.http.okhttp.OkHttpConfig;
 import com.ruomm.base.tools.Base64;
 import com.ruomm.base.tools.EncryptUtils;
 import com.ruomm.base.tools.RSAUtils;
@@ -66,6 +70,8 @@ public class UserAccountServiceImpl implements UserAccountService {
 	DbSeqService dbSeqService;
 	@Autowired
 	LoginUserAccountMapper loginUserAccountMapper;
+	@Autowired
+	LoginTermInfoMapper loginClientInfoMapper;
 	boolean VERIFY_IN_DB = true;
 	private static final String PWD_ERR_NONE = "none";
 
@@ -187,10 +193,17 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (null == resultLoginAppinfo || resultLoginAppinfo.getStatus() != 1) {
 			return ResultFactory.toNackCORE("无法登陆，应用授权失败");
 		}
+		LocationParse locationParse = parseLocationByLatLng(userInfoLoginReqDto.getLat(), userInfoLoginReqDto.getLng());
+		if (!locationParse.isValid()) {
+			return locationParse.getReturnResp();
+		}
+		LoginTermInfo queryLoginTermInfo = new LoginTermInfo();
+		queryLoginTermInfo.setLoginId(resultLoginUserAccount.getLoginId());
+		LoginTermInfo resultLoginTermInfo = loginClientInfoMapper.queryLastLoginTermInfo(queryLoginTermInfo);
 		LoginUserToken resultUUIDToken = secureTokenService.getTokenByUuidAndUserId(userInfoLoginReqDto.getAppId(),
 				resultLoginUserAccount.getLoginId(), userInfoLoginReqDto.getUuid());
 		LoginUuidParse uuidParse = secureTokenService.parseUuidLimit(userInfoLoginReqDto, resultLoginUserAccount,
-				resultLoginAppinfo, resultUUIDToken);
+				resultLoginAppinfo, resultUUIDToken, resultLoginTermInfo, locationParse);
 		if (!uuidParse.isValid()) {
 			return uuidParse.getReturnResp();
 		}
@@ -205,6 +218,24 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (!tokenResponseParse.isValid()) {
 			return tokenResponseParse.getReturnResp();
 		}
+		// 记录本次登录的信息
+		String dateTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
+		String loginTermInfoSeq = dbSeqService.getLoginTermInfoNewPk();
+		LoginTermInfo loginTermInfo = new LoginTermInfo();
+		loginTermInfo.setLoginSeq(loginTermInfoSeq);
+		loginTermInfo.setLoginId(resultLoginUserAccount.getLoginId());
+		loginTermInfo.setLat(userInfoLoginReqDto.getLat());
+		loginTermInfo.setLng(userInfoLoginReqDto.getLng());
+		loginTermInfo.setTermInfo(userInfoLoginReqDto.getTermInfo());
+		loginTermInfo.setProvince(locationParse.getProvince());
+		loginTermInfo.setCity(locationParse.getCity());
+		loginTermInfo.setCountry(locationParse.getCountry());
+		loginTermInfo.setAddress(locationParse.getDetailAdress());
+		loginTermInfo.setUpdateTime(dateTimeStr);
+		loginTermInfo.setCreateTime(dateTimeStr);
+		loginTermInfo.setVersion(1);
+		loginTermInfo.setIp(userInfoLoginReqDto.getIp());
+		loginClientInfoMapper.insertSelective(loginTermInfo);
 		// 发送数据到第三方服务器上
 		if (!StringUtils.isEmpty(resultLoginAppinfo.getNotifyUrl())
 				&& resultLoginAppinfo.getNotifyUrl().toLowerCase().startsWith("http")) {
@@ -256,7 +287,32 @@ public class UserAccountServiceImpl implements UserAccountService {
 		resultData.put("mobile", resultLoginUserAccount.getLoginMobile());
 		resultData.put("nickName", resultLoginUserAccount.getNickName());
 		resultData.put("headImg", resultLoginUserAccount.getHeadImg());
+
 		putIdCardInfo(resultData, resultLoginUserAccount);
+		if (locationParse.isVerifyLocation()) {
+			String loginArea = locationParse.getProvince() + "-" + locationParse.getCity();
+			resultData.put("loginArea", loginArea);
+			if (null != resultLoginTermInfo && !StringUtils.isEmpty(resultLoginTermInfo.getProvince())) {
+				String lastLoginArea = resultLoginTermInfo.getProvince() + "-" + resultLoginTermInfo.getCity();
+				resultData.put("lastLoginArea", lastLoginArea);
+				if (!lastLoginArea.equals(loginArea)) {
+					resultData.put("loginTip", "登录成功，" + loginArea + "，上次登录地区:" + lastLoginArea);
+				}
+				else {
+					resultData.put("loginTip", "登录成功，" + loginArea + "，和上次登录地区一致");
+				}
+			}
+			else if (null == resultLoginTermInfo) {
+				resultData.put("loginTip", "登录成功，" + loginArea + "，第一次登录本应用");
+			}
+			else {
+				resultData.put("loginTip", "登录成功，" + loginArea + "，上次登录地区:未知");
+			}
+
+		}
+		else {
+			resultData.put("loginTip", "登录成功");
+		}
 		return ResultFactory.toAck(resultData);
 	}
 
@@ -779,6 +835,61 @@ public class UserAccountServiceImpl implements UserAccountService {
 			resultMap.put("idCardNameSet", "1");
 		}
 
+	}
+
+	public LocationParse parseLocationByLatLng(String lat, String lng) {
+		LocationParse locationParse = new LocationParse();
+		if (null == AppConfig.UserLoginVerifyLocation() || !AppConfig.UserLoginVerifyLocation()) {
+			locationParse.setValid(true);
+			locationParse.setVerifyLocation(false);
+			return locationParse;
+		}
+		locationParse.setVerifyLocation(true);
+		locationParse.setValid(false);
+		double latValue = 0;
+		double lngValue = 0;
+		try {
+			latValue = Double.valueOf(lat);
+			lngValue = Double.valueOf(lng);
+		}
+		catch (Exception e) {
+			latValue = 0;
+			lngValue = 0;
+		}
+		if ((latValue < 0.5 && latValue > -0.5) || (lngValue < 0.5 && lngValue > -0.5)) {
+			locationParse.setReturnResp(ResultFactory.toNackPARAM("定位信息不正确，请开启定位后重新提交"));
+			return locationParse;
+		}
+		Map<String, String> map = new HashMap<String, String>();
+		// map.put("callback", "renderReverse");
+		map.put("location", lat + "," + lng);
+		map.put("output", "json");
+		map.put("ak", AppConfig.BaiduLocationAK());
+		String url = OkHttpConfig.createRequestUrlForGet("http://api.map.baidu.com/geocoder/v2/", map);
+		ResponseData responseData = new DataOKHttp().setUrl(url).setPost(false).doHttp(JSONObject.class);
+		System.out.println(responseData);
+		if (null == responseData || null == responseData.getResultObject()) {
+			locationParse.setReturnResp(ResultFactory.toNackCORE("获取定位信息失败"));
+			return locationParse;
+		}
+		JSONObject jsonObject = (JSONObject) responseData.getResultObject();
+		JSONObject resultJsonObject = jsonObject.getJSONObject("result");
+		if (!"0".equals(jsonObject.getString("status")) || null == resultJsonObject) {
+			locationParse.setReturnResp(ResultFactory.toNackCORE("获取定位信息失败"));
+			return locationParse;
+		}
+
+		JSONObject addressComponent = resultJsonObject.getJSONObject("addressComponent");
+		if (null == addressComponent || !"中国".equals(addressComponent.getString("country"))) {
+			locationParse.setReturnResp(ResultFactory.toNackCORE("定位获取不在国内，无法进行登录"));
+			return locationParse;
+		}
+		locationParse.setValid(true);
+		locationParse.setCountry(addressComponent.getString("country"));
+		locationParse.setProvince(addressComponent.getString("province"));
+		locationParse.setCity(addressComponent.getString("city"));
+		locationParse.setDetailAdress(resultJsonObject.getString("formatted_address"));
+		return locationParse;
 	}
 	// public boolean updateLoginUserInfo(LoginUserAccount dbLoginUserAccount, LoginUserAccount
 	// updateUserAccount) {

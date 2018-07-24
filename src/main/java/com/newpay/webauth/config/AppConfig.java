@@ -138,6 +138,18 @@ public class AppConfig {
 		return ConfigUtil.getValLongTime("request.timestamp_offset", 0l);
 	}
 
+	public static Boolean UserLoginVerifyLocation() {
+		return ConfigUtil.getValBoolean("user.login.verifylocation", false);
+	}
+
+	public static String UserLoginVerifyTime() {
+		return ConfigUtil.getValString("user.login.verifytime");
+	}
+
+	public static String BaiduLocationAK() {
+		return ConfigUtil.getValString("baidu.location.ak");
+	}
+
 	public static final Integer OKHTTP_CONNECT_TIMEOUT = 5;
 	public static final Integer OKHTTP_WRITE_TIMEOUT = 15;
 	public static final Integer OKHTTP_READ_TIMEOUT = 15;
@@ -152,6 +164,7 @@ public class AppConfig {
 	public static final long REQUEST_TIMESTAMP_MIN_OFFSET = 60000l;
 	public static SimpleDateFormat SDF_DB_DATE = new SimpleDateFormat("yyyyMMdd");
 	public static SimpleDateFormat SDF_DB_TIME = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+	public static SimpleDateFormat SDF_LOGIN_VERIFY = new SimpleDateFormat("HH:mm");
 	public static String PWD_ENCRYPT_NONE = "NONE";
 	public static String PWD_ENCRYPT_MD5 = "MD5";
 	public static String PWD_ENCRYPT_RSA = "RSA";

@@ -22,6 +22,7 @@ public class RegexUtil {
 	public static final String OPERATOR_PASSWORD = "^[!-~]{6,16}$";
 	public static final String APP_LOGIN_NAME = "^[a-zA-Z][a-zA-Z0-9\\_\\-]{3,31}$";
 	public static final String CONFIGVALUE_KEY = "^[a-zA-Z][a-zA-Z0-9\\_\\-]{3,32}$";
+	public static final String LOGIN_VERIFYTIME = "^\\d{2}:\\d{2}\\-\\d{2}:\\d{2}$";
 	// IP
 	public static final String IPV4 = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\."
 			+ "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." + "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\."

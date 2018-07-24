@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.newpay.webauth.dal.mapper.LoginTermInfoMapper">
+
+	<resultMap id="baseResultMap" type="com.newpay.webauth.dal.model.LoginTermInfo">
+			<result property="loginSeq" column="LOGIN_SEQ" jdbcType="VARCHAR"/>
+			<result property="loginId" column="LOGIN_ID" jdbcType="VARCHAR"/>
+			<result property="lat" column="LAT" jdbcType="VARCHAR"/>
+			<result property="lng" column="LNG" jdbcType="VARCHAR"/>
+			<result property="country" column="COUNTRY" jdbcType="VARCHAR"/>
+			<result property="province" column="PROVINCE" jdbcType="VARCHAR"/>
+			<result property="city" column="CITY" jdbcType="VARCHAR"/>
+			<result property="address" column="ADDRESS" jdbcType="VARCHAR"/>
+			<result property="ip" column="IP" jdbcType="VARCHAR"/>
+			<result property="termInfo" column="TERM_INFO" jdbcType="VARCHAR"/>
+			<result property="createTime" column="CREATE_TIME" jdbcType="VARCHAR"/>
+			<result property="updateTime" column="UPDATE_TIME" jdbcType="VARCHAR"/>
+			<result property="version" column="VERSION" jdbcType="NUMERIC"/>
+	</resultMap>
+
+	<select id="queryLastLoginTermInfo" resultMap="baseResultMap">
+		select * FROM (select * from TBL_LOGIN_TERM_INFO <where> LOGIN_ID= #{loginTermInfo.loginId} </where> ORDER by CREATE_TIME desc ) where rownum=1
+	</select>
+</mapper>
+

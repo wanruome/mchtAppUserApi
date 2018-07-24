@@ -9,7 +9,19 @@
 			<result property="loginEmail" column="LOGIN_EMAIL" jdbcType="VARCHAR"/>
 			<result property="loginPwd" column="LOGIN_PWD" jdbcType="VARCHAR"/>
 			<result property="status" column="STATUS" jdbcType="NUMERIC"/>
+			<result property="pwdErrCount" column="PWD_ERR_COUNT" jdbcType="VARCHAR"/>
+			<result property="pwdErrTime" column="PWD_ERR_TIME" jdbcType="VARCHAR"/>
+			<result property="lastAuthUuid" column="LAST_AUTH_UUID" jdbcType="VARCHAR"/>
+			<result property="lastAuthTime" column="LAST_AUTH_TIME" jdbcType="VARCHAR"/>
+			<result property="registerTime" column="REGISTER_TIME" jdbcType="VARCHAR"/>
+			<result property="updateTime" column="UPDATE_TIME" jdbcType="VARCHAR"/>
 			<result property="version" column="VERSION" jdbcType="NUMERIC"/>
+			<result property="idCardName" column="IDCARD_NAME" jdbcType="VARCHAR"/>
+			<result property="idCardNo" column="IDCARD_NO" jdbcType="VARCHAR"/>
+			<result property="nickName" column="NICK_NAME" jdbcType="VARCHAR"/>
+			<result property="headImg" column="HEAD_IMG" jdbcType="VARCHAR"/>
+
+			
 	</resultMap>
 
 	
