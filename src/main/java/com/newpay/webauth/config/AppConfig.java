@@ -6,7 +6,10 @@
 package com.newpay.webauth.config;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.ruomm.base.tools.StringUtils;
 import com.ruomm.base.tools.TimeUtils;
 
 public class AppConfig {
@@ -68,6 +71,39 @@ public class AppConfig {
 
 	public static Long UserToken_DeleteTime() {
 		return ConfigUtil.getValLongTime("usertoken.deletetime");
+	}
+
+	public static Long UserToken_UuidChangeLimitTime() {
+		return ConfigUtil.getValLongTime("usertoken.uuidchangelimittime", 0l);
+	}
+
+	public static Integer UserToken_UuidChangeLimitCount() {
+		return ConfigUtil.getValInteger("usertoken.uuidchangelimitcount", 0);
+	}
+
+	public static Long UserToken_UserChangeLimitTime() {
+		return ConfigUtil.getValLongTime("usertoken.userchangelimittime", 0l);
+	}
+
+	public static Integer UserToken_UserChangeLimitCount() {
+		return ConfigUtil.getValInteger("usertoken.userchangelimitcount", 0);
+	}
+
+	public static List<String> UserToken_RiskArea() {
+		String value = ConfigUtil.getValString("usertoken.riskarea");
+		if (StringUtils.isEmpty(value)) {
+			return new ArrayList<String>();
+		}
+		return StringUtils.getListString(value, ",");
+
+	}
+
+	public static Boolean UserToken_LoginVerifyLocation() {
+		return ConfigUtil.getValBoolean("usertoken.login.verifylocation", false);
+	}
+
+	public static String UserToken_LoginVerifyTime() {
+		return ConfigUtil.getValString("usertoken.login.verifytime");
 	}
 
 	public static Integer VerfiyCodeLength() {
@@ -136,14 +172,6 @@ public class AppConfig {
 
 	public static Long RequestTimeStampOffSet() {
 		return ConfigUtil.getValLongTime("request.timestamp_offset", 0l);
-	}
-
-	public static Boolean UserLoginVerifyLocation() {
-		return ConfigUtil.getValBoolean("user.login.verifylocation", false);
-	}
-
-	public static String UserLoginVerifyTime() {
-		return ConfigUtil.getValString("user.login.verifytime");
 	}
 
 	public static String BaiduLocationAK() {

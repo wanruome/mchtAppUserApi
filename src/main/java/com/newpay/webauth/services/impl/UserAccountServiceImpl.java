@@ -839,7 +839,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 
 	public LocationParse parseLocationByLatLng(String lat, String lng) {
 		LocationParse locationParse = new LocationParse();
-		if (null == AppConfig.UserLoginVerifyLocation() || !AppConfig.UserLoginVerifyLocation()) {
+		if (null == AppConfig.UserToken_LoginVerifyLocation() || !AppConfig.UserToken_LoginVerifyLocation()) {
 			locationParse.setValid(true);
 			locationParse.setVerifyLocation(false);
 			return locationParse;

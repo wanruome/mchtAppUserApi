@@ -263,7 +263,8 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 		String userId = resultLoginUserAccount.getLoginId();
 		String termType = userInfoLoginReqDto.getTermType();
 		String uuidTemp = userInfoLoginReqDto.getUuid();
-		String realUUID = appId + "_" + userId + "_" + uuidTemp;
+		// String realUUID = appId + "_" + userId + "_" + uuidTemp;
+		String realUUID = uuidTemp;
 		Integer termTypeLimit = null;
 		if (termType.equals(AppConfig.TERM_TYPE_ANDROID)) {
 			termTypeLimit = resultLoginAppInfo.getTermAndroidLimit();
@@ -345,6 +346,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 			loginUserToken.setLoginStatus(1);
 			loginUserToken.setValidTime(validTimeString);
 			loginUserToken.setCreateTime(nowTimeStr);
+			loginUserToken.setLoginTime(nowTimeStr);
 			loginUserToken.setVersion(1);
 			int dbResult = loginUserTokenMapper.insert(loginUserToken);
 			if (dbResult > 0) {
@@ -374,11 +376,13 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 			loginUserToken.setLoginStatus(1);
 			loginUserToken.setValidTime(validTimeString);
 			loginUserToken.setVersion(resultUUIDToken.getVersion());
+			loginUserToken.setLoginTime(nowTimeStr);
 			int dbResult = loginUserTokenMapper.updateByPrimaryKeySelective(loginUserToken);
 			loginUserToken.setAppId(appId);
 			loginUserToken.setUserId(userId);
 			loginUserToken.setUuid(realUUID);
 			loginUserToken.setCreateTime(resultUUIDToken.getCreateTime());
+
 			loginUserToken.setVersion(resultUUIDToken.getVersion() + 1);
 
 			if (dbResult > 0) {
@@ -431,7 +435,8 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 	@Override
 	public LoginUserToken getTokenByUuidAndUserId(String appId, String userId, String uuidReq) {
 		// TODO Auto-generated method stub
-		String realUUID = appId + "_" + userId + "_" + uuidReq;
+		// String realUUID = appId + "_" + userId + "_" + uuidReq;
+		String realUUID = uuidReq;
 		LoginUserToken queryUUIDToken = new LoginUserToken();
 		queryUUIDToken.setAppId(appId);
 		queryUUIDToken.setUserId(userId);
@@ -471,16 +476,69 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 			loginUuidParse.setReturnResp(ResultFactory.toNackCORE("该设备无权登录"));
 			return loginUuidParse;
 		}
+		// 查看是否频繁登录。
+		if (StringUtils.isEmpty(userInfoLoginReqDto.getMsgVerifyCode())
+				&& AppConfig.UserToken_UuidChangeLimitCount() > 0 && AppConfig.UserToken_UuidChangeLimitTime() > 0) {
+			String timeLimit = TimeUtils.formatTime(
+					System.currentTimeMillis() - AppConfig.UserToken_UuidChangeLimitTime(), AppConfig.SDF_DB_TIME);
+			LoginUserToken loginUserToken = new LoginUserToken();
+			loginUserToken.setUserId(resultLoginUserAccount.getLoginId());
+			loginUserToken.setAppId(resultLoginAppInfo.getAppId());
+			loginUserToken.setUuid(userInfoLoginReqDto.getUuid());
+			loginUserToken.setLoginTime(timeLimit);
+			int count = loginUserTokenMapper.selectUuidChangeCount(loginUserToken);
+			if (count >= AppConfig.UserToken_UuidChangeLimitCount()) {
+				loginUuidParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "频繁切换登录，需要验证码"));
+				return loginUuidParse;
+			}
+		}
+		if (StringUtils.isEmpty(userInfoLoginReqDto.getMsgVerifyCode())
+				&& AppConfig.UserToken_UserChangeLimitCount() > 0 && AppConfig.UserToken_UserChangeLimitTime() > 0) {
+			String timeLimit = TimeUtils.formatTime(
+					System.currentTimeMillis() - AppConfig.UserToken_UserChangeLimitTime(), AppConfig.SDF_DB_TIME);
+			LoginUserToken loginUserToken = new LoginUserToken();
+			loginUserToken.setUserId(resultLoginUserAccount.getLoginId());
+			loginUserToken.setAppId(resultLoginAppInfo.getAppId());
+			loginUserToken.setUuid(userInfoLoginReqDto.getUuid());
+			loginUserToken.setLoginTime(timeLimit);
+			int count = loginUserTokenMapper.selectUserIdChangeCount(loginUserToken);
+			if (count >= AppConfig.UserToken_UserChangeLimitCount()) {
+				loginUuidParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "频繁更换设备登录，需要验证码"));
+				return loginUuidParse;
+			}
+		}
+		// 查找风险地区，风险地区强制验证码登录
+		if (StringUtils.isEmpty(userInfoLoginReqDto.getMsgVerifyCode()) && null != locationParse
+				&& locationParse.isVerifyLocation()) {
+			List<String> listArea = AppConfig.UserToken_RiskArea();
+			boolean isRisk = false;
+			if (null != listArea && listArea.size() > 0) {
+				for (String tmp : listArea) {
+					String area = locationParse.getProvince() + "-" + locationParse.getCity();
+					if (area.contains(tmp)) {
+						isRisk = true;
+						break;
+					}
+				}
+			}
+			if (isRisk) {
+				loginUuidParse
+						.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "在交易风险地区登录，需要验证码"));
+				return loginUuidParse;
+			}
+		}
+
 		// 查找该设备是否可以直接登录
 		boolean isUuidCanLogin = isUuidCanLogin(userInfoLoginReqDto, resultLoginUserAccount);
 		// 查找有没有该UUID下面的设备，有的话不需要验证码登录
 		if (StringUtils.isEmpty(userInfoLoginReqDto.getMsgVerifyCode()) && !isUuidCanLogin) {
+
 			// 若是不同地区登录则需要验证码
 			if (null != locationParse && locationParse.isVerifyLocation()) {
 				if (null == resultLoginTermInfo || StringUtils.isEmpty(resultLoginTermInfo.getProvince())
 						|| StringUtils.isEmpty(resultLoginTermInfo.getCity())) {
 					loginUuidParse
-							.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "换地区登录，需要验证码登录"));
+							.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "换地区登录，需要验证码"));
 					return loginUuidParse;
 				}
 				if (!resultLoginTermInfo.getProvince().equals(locationParse.getProvince())
@@ -489,9 +547,10 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 							.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_NEED_VERIFYCODE, "换地区登录，需要验证码"));
 					return loginUuidParse;
 				}
+
 			}
 			// 若是在登录限制时段则需要验证码登录。
-			String loginVerifyTime = AppConfig.UserLoginVerifyTime();
+			String loginVerifyTime = AppConfig.UserToken_LoginVerifyTime();
 			if (RegexUtil.doRegex(loginVerifyTime, RegexUtil.LOGIN_VERIFYTIME)) {
 				String[] verifyTimeArray = loginVerifyTime.split("-");
 				String timeNow = AppConfig.SDF_LOGIN_VERIFY.format(new Date());
@@ -578,7 +637,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 
 	public LocationParse parseLocationByLatLng(String lat, String lng) {
 		LocationParse locationParse = new LocationParse();
-		if (null == AppConfig.UserLoginVerifyLocation() || !AppConfig.UserLoginVerifyLocation()) {
+		if (null == AppConfig.UserToken_LoginVerifyLocation() || !AppConfig.UserToken_LoginVerifyLocation()) {
 			locationParse.setValid(true);
 			return locationParse;
 		}

@@ -18,4 +18,8 @@ public interface LoginUserTokenMapper extends Mapper<LoginUserToken> {
 
 	public List<LoginUserToken> selectLoginTokens(@Param("loginUserToken") LoginUserToken loginUserToken);
 
+	public int selectUuidChangeCount(@Param("loginUserToken") LoginUserToken loginUserToken);
+
+	public int selectUserIdChangeCount(@Param("loginUserToken") LoginUserToken loginUserToken);
+
 }

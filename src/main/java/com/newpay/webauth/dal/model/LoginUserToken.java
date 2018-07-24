@@ -34,7 +34,10 @@ public class LoginUserToken {
 	private Integer loginStatus;
 	@Column(name = "CREATE_TIME")
 	private String createTime;
+	@Column(name = "LOGIN_TIME")
+	private String loginTime;
 	@Column(name = "VERSION")
 	@Version
 	private Integer version;
+
 }

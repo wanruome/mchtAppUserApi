@@ -6,12 +6,15 @@
 			<result property="tokenId" column="TOKEN_ID" jdbcType="VARCHAR"/>
 			<result property="userId" column="USER_ID" jdbcType="VARCHAR"/>
 			<result property="appId" column="APP_ID" jdbcType="VARCHAR"/>
+			<result property="uuid" column="UUID" jdbcType="VARCHAR"/>
 			<result property="termType" column="TERM_TYPE" jdbcType="NUMERIC"/>
 			<result property="token" column="TOKEN" jdbcType="VARCHAR"/>
 			<result property="validTime" column="VALID_TIME" jdbcType="VARCHAR"/>
 			<result property="loginStatus" column="LOGIN_STATUS" jdbcType="NUMERIC"/>
 			<result property="createTime" column="CREATE_TIME" jdbcType="VARCHAR"/>
+			<result property="loginTime" column="LOGIN_TIME" jdbcType="VARCHAR"/>
 			<result property="version" column="VERSION" jdbcType="NUMERIC"/>
+
 	</resultMap>
 	<update id="logoutAllInValid" >
 		<![CDATA[
@@ -29,7 +32,30 @@
 		</where>
 		order by VALID_TIME
 	</select>
-	
+	<select id="selectUuidChangeCount" resultType="int">
+		select count(*) from (
+			select * from TBL_LOGIN_USER_TOKEN 
+			<where>
+				APP_ID=#{loginUserToken.appId} AND UUID=#{loginUserToken.uuid} AND USER_ID!=#{loginUserToken.userId} 
+				<if test="loginUserToken.loginTime !=null">
+					AND LOGIN_TIME >= #{loginUserToken.loginTime}
+				</if>
+			</where>
+			order by VALID_TIME
+		)
+	</select>
+	<select id="selectUserIdChangeCount" resultType="int">
+		select count(*) from (
+			select * from TBL_LOGIN_USER_TOKEN 
+			<where>
+				USER_ID=#{loginUserToken.userId} AND APP_ID=#{loginUserToken.appId} AND UUID!=#{loginUserToken.uuid} 
+				<if test="loginUserToken.loginTime !=null">
+					AND LOGIN_TIME >= #{loginUserToken.loginTime}
+				</if>
+			</where>
+			order by VALID_TIME
+		)
+	</select>
 	
 
 	
