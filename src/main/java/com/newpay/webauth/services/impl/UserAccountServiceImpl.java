@@ -274,6 +274,18 @@ public class UserAccountServiceImpl implements UserAccountService {
 				return ResultFactory.toNackCORE("应用授权登录失败，第三方服务器无响应");
 			}
 		}
+		String tmpString = null;
+		if (!StringUtils.isEmpty(userInfoLoginReqDto.getRasPublicKey())) {
+			PublicKey publicKey = RSAUtils.loadPublicKey(userInfoLoginReqDto.getRasPublicKey());
+			tmpString = Base64.encode(
+					RSAUtils.encryptDataBig(tokenResponseParse.getLoginUserToken().getToken().getBytes(), publicKey));
+		}
+		else {
+			tmpString = tokenResponseParse.getLoginUserToken().getToken();
+		}
+		if (StringUtils.isEmpty(tmpString)) {
+			return ResultFactory.toNackDB();
+		}
 		JSONObject remarkJson = new JSONObject();
 		remarkJson.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId());
 		remarkJson.put("tokenVersion", tokenResponseParse.getLoginUserToken().getVersion());
@@ -283,7 +295,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 		Map<String, String> resultData = new HashMap<>();
 		resultData.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId() + "_"
 				+ tokenResponseParse.getLoginUserToken().getVersion());
-		resultData.put("token", tokenResponseParse.getLoginUserToken().getToken());
+		resultData.put("token", tmpString);
 		resultData.put("validTime", tokenResponseParse.getLoginUserToken().getValidTime());
 		resultData.put("termType", tokenResponseParse.getLoginUserToken().getTermType() + "");
 		resultData.put("userId", resultLoginUserAccount.getLoginId());

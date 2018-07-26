@@ -13,8 +13,8 @@ import lombok.Data;
 public class UserInfoLoginReqDto {
 	@NotEmpty
 	private String uuid;
-	@NotEmpty
-	private String uuidEncrypt;
+	// @NotEmpty
+	// private String uuidEncrypt;
 	@NotEmpty
 	private String signInfo;
 	@NotEmpty
@@ -34,4 +34,5 @@ public class UserInfoLoginReqDto {
 	private String lng;
 	private String termInfo;
 	private String ip;
+	private String rasPublicKey;
 }
