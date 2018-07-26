@@ -27,5 +27,7 @@ public class SystemLogFunction {
 	private Integer requstLog;
 	@Column(name = "STATUS")
 	private Integer status;
+	@Column(name = "RESULT_LOG")
+	private Integer resultLog;
 
 }

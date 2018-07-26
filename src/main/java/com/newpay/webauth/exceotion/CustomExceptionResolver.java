@@ -15,13 +15,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.alibaba.fastjson.JSONObject;
-import com.newpay.webauth.aop.SystemLogThreadLocal;
-import com.newpay.webauth.config.AppConfig;
-import com.newpay.webauth.config.listener.SpringContextHolder;
-import com.newpay.webauth.dal.core.SysLogBean;
-import com.newpay.webauth.dal.core.SystemLogThread;
 import com.newpay.webauth.dal.response.ResultFactory;
-import com.newpay.webauth.services.SystemLogService;
 import com.ruomm.base.tools.BaseWebUtils;
 import com.ruomm.base.tools.StringUtils;
 
@@ -47,36 +41,36 @@ public class CustomExceptionResolver implements HandlerExceptionResolver {
 		}
 
 		String contentType = StringUtils.nullStrToEmpty(request.getHeader("content-type")).toLowerCase();
-		if (isApp) {
-			// 解析写入日志
-			// 写入日志
-			SysLogBean sysLogBean = null;
-			try {
-				sysLogBean = SystemLogThreadLocal.get();
-
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-			finally {
-				SystemLogThreadLocal.cleanSysLogBean();
-			}
-			try {
-				if (null != sysLogBean) {
-					if (AppConfig.SystemLogAsync()) {
-						new SystemLogThread(sysLogBean, ResultFactory.ERR_UNKNOWN, "系统异常").start();
-					}
-					else {
-						SystemLogService systemLogService = SpringContextHolder.getBean(SystemLogService.class);
-						systemLogService.writeLogs(sysLogBean, ResultFactory.ERR_UNKNOWN, "系统异常");
-					}
-
-				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		// if (isApp) {
+		// // 解析写入日志
+		// // 写入日志
+		// SysLogBean sysLogBean = null;
+		// try {
+		// sysLogBean = SystemLogThreadLocal.get();
+		//
+		// }
+		// catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// finally {
+		// SystemLogThreadLocal.cleanSysLogBean();
+		// }
+		// try {
+		// if (null != sysLogBean) {
+		// if (AppConfig.SystemLogAsync()) {
+		// new SystemLogThread(sysLogBean, ResultFactory.ERR_UNKNOWN, "系统异常").start();
+		// }
+		// else {
+		// SystemLogService systemLogService = SpringContextHolder.getBean(SystemLogService.class);
+		// systemLogService.writeLogs(sysLogBean, ResultFactory.ERR_UNKNOWN, "系统异常");
+		// }
+		//
+		// }
+		// }
+		// catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
 		// 解析JSON请求
 		if (isApp && (contentType.contains("application/json") || contentType.contains("text/plain"))) {
 

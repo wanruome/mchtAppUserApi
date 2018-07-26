@@ -37,7 +37,7 @@ public class ManagerTokenSericeImpl implements ManagerTokenSerice {
 		log.info("resultToken:", resultToken);
 		ManagerToken updateToken = new ManagerToken();
 		updateToken.setManager(manager);
-		updateToken.setAuthToken(TokenUtil.generateToken(16));
+		updateToken.setAuthToken(TokenUtil.generateSysreloadToken());
 		String nowTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
 		int dbResult = 0;
 		if (null == resultToken) {

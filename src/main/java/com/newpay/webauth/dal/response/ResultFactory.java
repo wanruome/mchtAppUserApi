@@ -189,6 +189,14 @@ public class ResultFactory {
 		}
 		try {
 			if (null != sysLogBean) {
+				if (sysLogBean.isResultInfoLog()) {
+					String resultInfo = resultJson.toJSONString();
+					if (StringUtils.getLengthByChar(resultInfo) <= 4000) {
+						sysLogBean.setResultInfo(resultInfo);
+					}
+
+				}
+
 				if (AppConfig.SystemLogAsync()) {
 					new SystemLogThread(sysLogBean, realCode, realMsg).start();
 				}

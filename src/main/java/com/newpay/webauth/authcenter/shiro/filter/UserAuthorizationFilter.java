@@ -71,13 +71,14 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	private boolean processAccessDeniedFastJson(ServletRequest request, ServletResponse response) throws IOException {
 		JSONObject jsonObject = null;
 		String contentType = request.getContentType();
-
+		String postDataStr = null;
 		HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 		boolean isPostJson = "POST".equals(httpServletRequest.getMethod().toUpperCase()) && null != contentType
 				&& (contentType.contains("application/json") || contentType.contains("text/plain"));
 		if (isPostJson) {
 			try {
-				jsonObject = JSON.parseObject(IOUtils.toString(request.getInputStream(), "UTF-8"));
+				postDataStr = IOUtils.toString(request.getInputStream(), "UTF-8");
+				jsonObject = JSON.parseObject(postDataStr);
 				log.info("请求信息:" + jsonObject.toJSONString());
 			}
 			catch (Exception e) {
@@ -228,11 +229,17 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 			sysLogBean.setMapping(systemLogFunction.getMapping());
 			sysLogBean.setStartTime(new Date().getTime());
 			if (null != systemLogFunction.getRequstLog() && systemLogFunction.getRequstLog() == 1) {
-				String jsonStr = jsonObject.toJSONString();
-				int length = StringUtils.getLength(jsonStr);
-				if (length < 1000) {
-					sysLogBean.setRequestInfo(jsonStr);
+				// String jsonStr = jsonObject.toJSONString();
+				int length = StringUtils.getLengthByChar(postDataStr);
+				if (length < 4000) {
+					sysLogBean.setRequestInfo(postDataStr);
 				}
+			}
+			if (null != systemLogFunction.getResultLog() && systemLogFunction.getResultLog() == 1) {
+				sysLogBean.setResultInfoLog(true);
+			}
+			else {
+				sysLogBean.setResultInfoLog(false);
 			}
 			SystemLogThreadLocal.setSysLogBean(sysLogBean);
 		}

@@ -50,7 +50,8 @@ public class SystemLogServiceImpl implements SystemLogService {
 			systemLog.setRequestInfo(sysLogBean.getRequestInfo());
 			systemLog.setResultCode(resultCode);
 			systemLog.setResultMsg(resultMsg);
-
+			systemLog.setResultInfo(sysLogBean.getResultInfo());
+			systemLog.setRemark(sysLogBean.getRemark());
 			Date date = new Date();
 			systemLog.setCreateDate(AppConfig.SDF_DB_DATE.format(date));
 			systemLog.setCreateTime(AppConfig.SDF_DB_TIME.format(date));
@@ -67,7 +68,21 @@ public class SystemLogServiceImpl implements SystemLogService {
 			systemLogMapper.insert(systemLog);
 			// 插入重要的检索信息表，提高关键日志检索效率
 			if (ResultFactory.ERR_PWD_WRONG.equals(code)
-					|| "app/userAccount/doRegister".equals(sysLogBean.getMapping())) {
+					|| "app/keypair/getPublicKeyByUuid".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doRegister".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doLogin".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doModifyPwd".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doFindPwd".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doLogout".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doLogout".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doVerifyPassword".equals(sysLogBean.getMapping())
+					|| "app/userAccount/doLogout".equals(sysLogBean.getMapping())
+					|| "app/repaymentPayInfo/doGetPayInfo".equals(sysLogBean.getMapping())
+					|| "app/repaymentPayInfo/doSetPayPwd".equals(sysLogBean.getMapping())
+					|| "app/repaymentPayInfo/doModifyPayPwd".equals(sysLogBean.getMapping())
+					|| "app/repaymentPayInfo/doFindPayPwd".equals(sysLogBean.getMapping())
+					|| "app/repaymentPayInfo/doModifyNoPwdFlag".equals(sysLogBean.getMapping())
+					|| "app/repaymentPayInfo/doVerifyPassword".equals(sysLogBean.getMapping())) {
 				SystemLogMatter systemLogMatter = new SystemLogMatter();
 				systemLogMatter.setLogId(systemLog.getLogId());
 				systemLogMatter.setUserId(systemLog.getUserId());
@@ -77,8 +92,11 @@ public class SystemLogServiceImpl implements SystemLogService {
 				systemLogMatter.setFunctionId(systemLog.getFunctionId());
 				systemLogMatter.setFunctionName(systemLog.getFunctionName());
 				systemLogMatter.setMapping(systemLog.getMapping());
+				systemLogMatter.setRequestInfo(sysLogBean.getRequestInfo());
 				systemLogMatter.setResultCode(resultCode);
 				systemLogMatter.setResultMsg(resultMsg);
+				systemLogMatter.setResultInfo(sysLogBean.getResultInfo());
+				systemLogMatter.setRemark(sysLogBean.getRemark());
 				systemLogMatter.setCreateDate(systemLog.getCreateDate());
 				systemLogMatter.setCreateTime(systemLog.getCreateTime());
 				systemLogMatter.setExcuteTime(excuteTime);

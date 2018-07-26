@@ -274,6 +274,12 @@ public class UserAccountServiceImpl implements UserAccountService {
 				return ResultFactory.toNackCORE("应用授权登录失败，第三方服务器无响应");
 			}
 		}
+		JSONObject remarkJson = new JSONObject();
+		remarkJson.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId());
+		remarkJson.put("tokenVersion", tokenResponseParse.getLoginUserToken().getVersion());
+		remarkJson.put("token", tokenResponseParse.getLoginUserToken().getToken());
+		remarkJson.put("userId", resultLoginUserAccount.getLoginId());
+		SystemLogThreadLocal.setRemark(remarkJson.toJSONString());
 		Map<String, String> resultData = new HashMap<>();
 		resultData.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId() + "_"
 				+ tokenResponseParse.getLoginUserToken().getVersion());

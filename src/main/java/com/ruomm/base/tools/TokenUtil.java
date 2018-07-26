@@ -10,29 +10,34 @@ import java.util.UUID;
 
 public class TokenUtil {
 	public static final String CHARSFORTOKEN = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	public static final int CHARSFORTOKENSIZE = 52;
-	public static final int DEFAULT_TOKEN_SIZE = 16;
-	public static final int DEFAULT_VERIFY_TOKEN_SIZE = 8;
+	public static final int CHARSFORTOKENSIZE = 62;
+	public static final int DEFAULT_TOKEN_SIZE = 32;
+	public static final int DEFAULT_VERIFY_TOKEN_SIZE = 16;
+	public static final int DEFAULT_SYSRELOAD_TOKEN_SIZE = 8;
 
 	private TokenUtil() {
 
 	}
 
-	public static String generateToken() {
+	public static String generateLoginToken() {
 		return generateToken(DEFAULT_TOKEN_SIZE);
 	}
 
-	public static String generateToken(int length) {
+	public static String generateSysreloadToken() {
+		return generateToken(DEFAULT_SYSRELOAD_TOKEN_SIZE);
+	}
+
+	public static String generateMsgAuthToken() {
+		return generateToken(DEFAULT_VERIFY_TOKEN_SIZE);
+	}
+
+	private static String generateToken(int length) {
 		StringBuilder sb = new StringBuilder();
 		Random random = new Random();
 		for (int i = 0; i < length; i++) {
 			sb.append(CHARSFORTOKEN.charAt(random.nextInt(CHARSFORTOKENSIZE)));
 		}
 		return sb.toString();
-	}
-
-	public static String generateVerifyToken() {
-		return generateToken(DEFAULT_VERIFY_TOKEN_SIZE);
 	}
 
 	/**

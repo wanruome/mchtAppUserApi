@@ -35,6 +35,10 @@ public class SystemLog {
 	private String resultCode;
 	@Column(name = "RESULT_MSG")
 	private String resultMsg;
+	@Column(name = "RESULT_INFO")
+	private String resultInfo;
+	@Column(name = "REMARK")
+	private String remark;
 	@Column(name = "MAPPING")
 	private String mapping;
 	@Column(name = "EXCUTE_TIME")

@@ -26,6 +26,24 @@ public class SystemLogThreadLocal {
 		dataSourceKey.remove();
 	}
 
+	public static void setRemark(String remark) {
+		SysLogBean sysLogBean = null;
+		try {
+			sysLogBean = get();
+			if (null != sysLogBean) {
+				sysLogBean.setRemark(remark);
+			}
+			else {
+				cleanSysLogBean();
+			}
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+
+	}
+
 	public static void setUserId(String userId) {
 		SysLogBean sysLogBean = null;
 		try {

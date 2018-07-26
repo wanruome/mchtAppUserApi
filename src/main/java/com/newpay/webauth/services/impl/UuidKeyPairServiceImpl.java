@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.newpay.webauth.aop.SystemLogThreadLocal;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.dal.mapper.UuidKeyPairMapper;
 import com.newpay.webauth.dal.model.UuidKeyPair;
@@ -122,6 +123,7 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 				returnKeyPair = dbResult > 0 ? updateBean : null;
 			}
 		}
+
 		if (null == returnKeyPair) {
 			return ResultFactory.toNackDB();
 		}
@@ -138,6 +140,11 @@ public class UuidKeyPairServiceImpl implements UuidKeyPairService {
 			if (StringUtils.isEmpty(tmpString)) {
 				return ResultFactory.toNackDB();
 			}
+			JSONObject remarkJson = new JSONObject();
+			remarkJson.put("publicKey", returnKeyPair.getPublicKey());
+			remarkJson.put("privateKey", returnKeyPair.getPrivateKey());
+			remarkJson.put("keyVersion", returnKeyPair.getKeyVersion());
+			SystemLogThreadLocal.setRemark(remarkJson.toJSONString());
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("uuid", returnKeyPair.getUuid());
 			jsonObject.put("publicKey", tmpString);

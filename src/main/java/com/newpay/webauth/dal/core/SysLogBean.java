@@ -18,4 +18,7 @@ public class SysLogBean {
 	private String requestInfo;
 	private String mapping;
 	private long startTime;
+	private boolean isResultInfoLog;
+	private String resultInfo;
+	private String remark;
 }

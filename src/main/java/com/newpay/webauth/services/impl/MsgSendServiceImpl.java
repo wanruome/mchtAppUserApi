@@ -184,7 +184,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String functionId = msgFunctionInfo.getFunctionId();
 		int msgType = isMobile ? 1 : 2;
 		String msgCode = MsgFunctionConfig.generateVerifyCode();
-		String msgToken = TokenUtil.generateVerifyToken();
+		String msgToken = TokenUtil.generateMsgAuthToken();
 		String msgContent = MsgFunctionConfig.generateVerifyContent(msgFunctionInfo, msgCode, isMobile, isEmail);
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();
@@ -322,7 +322,7 @@ public class MsgSendServiceImpl implements MsgSendService {
 		String functionId = msgFunctionInfo.getFunctionId();
 		int msgType = isMobile ? 1 : 2;
 		String msgCode = MsgFunctionConfig.generateVerifyCode();
-		String msgToken = TokenUtil.generateVerifyToken();
+		String msgToken = TokenUtil.generateMsgAuthToken();
 		String msgContent = MsgFunctionConfig.generateVerifyContent(msgFunctionInfo, msgCode, isMobile, isEmail);
 		String msgAddr = msgSendReqDto.getMsgAddr();
 		Date nowDate = new Date();

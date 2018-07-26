@@ -342,7 +342,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 			loginUserToken.setUserId(userId);
 			loginUserToken.setUuid(realUUID);
 			loginUserToken.setTermType(Integer.valueOf(termType));
-			loginUserToken.setToken(TokenUtil.generateToken());
+			loginUserToken.setToken(TokenUtil.generateLoginToken());
 			loginUserToken.setLoginStatus(1);
 			loginUserToken.setValidTime(validTimeString);
 			loginUserToken.setCreateTime(nowTimeStr);
@@ -372,7 +372,7 @@ public class SecureTokenServiceImpl implements SecureTokenService {
 			LoginUserToken loginUserToken = new LoginUserToken();
 			loginUserToken.setTokenId(resultUUIDToken.getTokenId());
 			loginUserToken.setTermType(Integer.valueOf(termType));
-			loginUserToken.setToken(TokenUtil.generateToken());
+			loginUserToken.setToken(TokenUtil.generateLoginToken());
 			loginUserToken.setLoginStatus(1);
 			loginUserToken.setValidTime(validTimeString);
 			loginUserToken.setVersion(resultUUIDToken.getVersion());
