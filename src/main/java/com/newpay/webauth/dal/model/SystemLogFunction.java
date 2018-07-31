@@ -29,5 +29,9 @@ public class SystemLogFunction {
 	private Integer status;
 	@Column(name = "RESULT_LOG")
 	private Integer resultLog;
+	@Column(name = "TERM_LOG")
+	private Integer tremLog;
+	@Column(name = "LOCATION_VERIFY")
+	private Integer locationVerify;
 
 }

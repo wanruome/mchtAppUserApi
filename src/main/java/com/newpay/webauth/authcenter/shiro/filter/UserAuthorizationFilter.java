@@ -25,24 +25,33 @@ import com.newpay.webauth.aop.SystemLogThreadLocal;
 import com.newpay.webauth.config.AppConfig;
 import com.newpay.webauth.config.MsgFunctionConfig;
 import com.newpay.webauth.config.SystemLogFunctionConfig;
+import com.newpay.webauth.config.listener.SpringContextHolder;
 import com.newpay.webauth.config.sign.SignTools;
+import com.newpay.webauth.dal.core.LocationParse;
+import com.newpay.webauth.dal.core.LocationParseUtil;
 import com.newpay.webauth.dal.core.SysLogBean;
+import com.newpay.webauth.dal.mapper.LoginTermInfoMapper;
 import com.newpay.webauth.dal.mapper.LoginUserAccountMapper;
 import com.newpay.webauth.dal.mapper.LoginUserTokenMapper;
 import com.newpay.webauth.dal.mapper.MsgAuthInfoMapper;
 import com.newpay.webauth.dal.mapper.SignInfoManagerMapper;
+import com.newpay.webauth.dal.mapper.TermInfoLogMapper;
 import com.newpay.webauth.dal.mapper.UuidKeyPairMapper;
+import com.newpay.webauth.dal.model.LoginTermInfo;
 import com.newpay.webauth.dal.model.LoginUserAccount;
 import com.newpay.webauth.dal.model.LoginUserToken;
 import com.newpay.webauth.dal.model.MsgAuthInfo;
 import com.newpay.webauth.dal.model.MsgFunctionInfo;
 import com.newpay.webauth.dal.model.SignInfoManager;
 import com.newpay.webauth.dal.model.SystemLogFunction;
+import com.newpay.webauth.dal.model.TermInfoLog;
 import com.newpay.webauth.dal.model.UuidKeyPair;
 import com.newpay.webauth.dal.request.useraccount.UserInfoModifyMobie;
 import com.newpay.webauth.dal.response.ResultFactory;
+import com.newpay.webauth.services.DbSeqService;
 import com.ruomm.base.tools.BaseWebUtils;
 import com.ruomm.base.tools.FastJsonTools;
+import com.ruomm.base.tools.IPUtils;
 import com.ruomm.base.tools.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +68,12 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 	SignInfoManagerMapper signInfoManagerMapper;
 	@Autowired
 	UuidKeyPairMapper uuidKeyPairMapper;
+	// @Autowired
+	// LoginTermInfoMapper loginTermInfoMapper;
+	// @Autowired
+	// TermInfoLogMapper termInfoLogMapper;
+	// @Autowired(required = true)
+	// DbSeqService dbSeqService;
 
 	@Override
 	protected boolean onAccessDenied(ServletRequest request, ServletResponse response) throws IOException {
@@ -242,6 +257,15 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 				sysLogBean.setResultInfoLog(false);
 			}
 			SystemLogThreadLocal.setSysLogBean(sysLogBean);
+			// 风险控制记录功能
+
+			LocationParse locationParse = doSaveTremInfoLog(request, systemLogFunction, sysLogBean, jsonObject,
+					jsonKeyMap);
+			if (!locationParse.isValid()) {
+				throwException(response, locationParse.getReturnResp());
+				return false;
+			}
+
 		}
 
 		// 进行短信验证码验证流程
@@ -542,6 +566,78 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 
 	}
 
+	public LocationParse doSaveTremInfoLog(ServletRequest request, SystemLogFunction systemLogFunction,
+			SysLogBean sysLogBean, JSONObject jsonObject, Map<String, String> jsonKeyMap) {
+		LoginTermInfoMapper loginTermInfoMapper = SpringContextHolder.getBean(LoginTermInfoMapper.class);
+		TermInfoLogMapper termInfoLogMapper = SpringContextHolder.getBean(TermInfoLogMapper.class);
+		DbSeqService dbSeqService = SpringContextHolder.getBean(DbSeqService.class);
+		if (null == systemLogFunction || null == systemLogFunction.getTremLog()
+				|| systemLogFunction.getTremLog() != 1) {
+			LocationParse returnParse = new LocationParse();
+			returnParse.setValid(true);
+			return returnParse;
+		}
+		String tokenId = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, AppConfig.REQUEST_FIELD_TOKEN_ID);
+		String ip = IPUtils.getRequestIP((HttpServletRequest) request);
+		String lat = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, "lat");
+		String lng = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, "lng");
+		String termInfo = FastJsonTools.getStringByKey(jsonObject, jsonKeyMap, "termInfo");
+		LocationParse loactionParse = LocationParseUtil.parseLocationByLatLng(lat, lng);
+
+		String dateTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
+		TermInfoLog termInfoLog = new TermInfoLog();
+		// SystemLog systemLog = new SystemLog();
+		termInfoLog.setLogId(dbSeqService.getTermInfoLogNewPk());
+		termInfoLog.setUserId(sysLogBean.getUserId());
+		termInfoLog.setLogKeyValue(sysLogBean.getLogKeyValue());
+		termInfoLog.setUuid(sysLogBean.getUuid());
+		termInfoLog.setAppId(sysLogBean.getAppId());
+		termInfoLog.setFunctionId(sysLogBean.getFunctionId());
+		termInfoLog.setFunctionName(sysLogBean.getFunctionName());
+		termInfoLog.setMapping(sysLogBean.getMapping());
+		termInfoLog.setLat(loactionParse.getLat());
+		termInfoLog.setLng(loactionParse.getLng());
+		termInfoLog.setTermInfo(termInfo);
+		termInfoLog.setProvince(loactionParse.getProvince());
+		termInfoLog.setCity(loactionParse.getCity());
+		termInfoLog.setCountry(loactionParse.getCountry());
+		termInfoLog.setAddress(loactionParse.getDetailAdress());
+		termInfoLog.setUpdateTime(dateTimeStr);
+		termInfoLog.setCreateTime(dateTimeStr);
+		termInfoLog.setVersion(1);
+		termInfoLog.setIp(ip);
+		termInfoLog.setTokenId(tokenId);
+		termInfoLogMapper.insert(termInfoLog);
+		if (!loactionParse.isValid()) {
+			return loactionParse;
+		}
+		if (null == systemLogFunction.getLocationVerify() || systemLogFunction.getLocationVerify() != 1) {
+			return loactionParse;
+		}
+		if (StringUtils.isEmpty(tokenId)) {
+			return loactionParse;
+		}
+		LoginTermInfo queryTermInfo = new LoginTermInfo();
+		queryTermInfo.setTokenId(tokenId);
+		LoginTermInfo resultTermInfo = loginTermInfoMapper.selectOne(queryTermInfo);
+		if (null == resultTermInfo || StringUtils.isEmpty(resultTermInfo.getLat())
+				|| StringUtils.isEmpty(resultTermInfo.getLng()) || StringUtils.isEmpty(resultTermInfo.getCountry())
+				|| StringUtils.isEmpty(resultTermInfo.getProvince()) || StringUtils.isEmpty(resultTermInfo.getCity())) {
+			return loactionParse;
+		}
+		if (resultTermInfo.getCountry().equals(loactionParse.getCountry())
+				&& resultTermInfo.getProvince().equals(loactionParse.getProvince())
+				&& resultTermInfo.getCity().equals(loactionParse.getCity())) {
+			return loactionParse;
+		}
+		else {
+			loactionParse.setValid(false);
+			loactionParse.setReturnResp(ResultFactory.toNack(ResultFactory.ERR_LOCATION_CHANGE, "地区位置变换，需要重新登录"));
+			return loactionParse;
+		}
+
+	}
+
 	public String getPublicKeyByUuidAndEncrypt(String uuid, String encrypt) {
 		if (StringUtils.isEmpty(uuid) || StringUtils.isEmpty(encrypt)) {
 			return null;
@@ -587,6 +683,19 @@ public class UserAuthorizationFilter extends AuthorizationFilter {
 		else {
 			return resultUserToken.getToken();
 		}
+	}
+
+	private void throwException(ServletResponse response, JSONObject resultJson) throws IOException {
+		HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+		httpServletResponse.setHeader("Content-type", "application/json;charset=UTF-8");
+		httpServletResponse.setHeader("Cache-Control", "no-cache, must-revalidate");
+		if (null != resultJson) {
+			httpServletResponse.getWriter().write(resultJson.toJSONString());
+		}
+		else {
+			httpServletResponse.getWriter().write(ResultFactory.toNack(ResultFactory.ERR_UNKNOWN, null).toJSONString());
+		}
+
 	}
 
 	private void throwException(ServletResponse response, String errCode) throws IOException {

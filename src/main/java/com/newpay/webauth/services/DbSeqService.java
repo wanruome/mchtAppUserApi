@@ -23,4 +23,6 @@ public interface DbSeqService {
 	public String getFeedBackNewPk();
 
 	public String getLoginTermInfoNewPk();
+
+	public String getTermInfoLogNewPk();
 }

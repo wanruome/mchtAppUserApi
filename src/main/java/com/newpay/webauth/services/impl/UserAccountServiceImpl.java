@@ -218,12 +218,15 @@ public class UserAccountServiceImpl implements UserAccountService {
 		if (!tokenResponseParse.isValid()) {
 			return tokenResponseParse.getReturnResp();
 		}
+		String tokenId = tokenResponseParse.getLoginUserToken().getTokenId() + "_"
+				+ tokenResponseParse.getLoginUserToken().getVersion();
 		// 记录本次登录的信息
 		String dateTimeStr = AppConfig.SDF_DB_TIME.format(new Date());
 		String loginTermInfoSeq = dbSeqService.getLoginTermInfoNewPk();
 		LoginTermInfo loginTermInfo = new LoginTermInfo();
 		loginTermInfo.setLoginSeq(loginTermInfoSeq);
 		loginTermInfo.setLoginId(resultLoginUserAccount.getLoginId());
+		loginTermInfo.setTokenId(tokenId);
 		loginTermInfo.setLat(userInfoLoginReqDto.getLat());
 		loginTermInfo.setLng(userInfoLoginReqDto.getLng());
 		loginTermInfo.setTermInfo(userInfoLoginReqDto.getTermInfo());
@@ -293,8 +296,7 @@ public class UserAccountServiceImpl implements UserAccountService {
 		remarkJson.put("userId", resultLoginUserAccount.getLoginId());
 		SystemLogThreadLocal.setRemark(remarkJson.toJSONString());
 		Map<String, String> resultData = new HashMap<>();
-		resultData.put("tokenId", tokenResponseParse.getLoginUserToken().getTokenId() + "_"
-				+ tokenResponseParse.getLoginUserToken().getVersion());
+		resultData.put("tokenId", tokenId);
 		resultData.put("token", tmpString);
 		resultData.put("validTime", tokenResponseParse.getLoginUserToken().getValidTime());
 		resultData.put("termType", tokenResponseParse.getLoginUserToken().getTermType() + "");

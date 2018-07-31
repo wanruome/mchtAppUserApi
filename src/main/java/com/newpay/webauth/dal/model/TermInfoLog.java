@@ -13,15 +13,25 @@ import lombok.Data;
 import tk.mybatis.mapper.annotation.Version;
 
 @Data
-@Table(name = "TBL_LOGIN_TERM_INFO")
-public class LoginTermInfo {
+@Table(name = "TBL_TERMINFO_LOG")
+public class TermInfoLog {
 	@Id
-	@Column(name = "LOGIN_SEQ")
-	private String loginSeq;
-	@Column(name = "LOGIN_ID")
-	private String loginId;
-	@Column(name = "TOKEN_ID")
-	private String tokenId;
+	@Column(name = "LOG_ID")
+	private String logId;
+	@Column(name = "USER_ID")
+	private String userId;
+	@Column(name = "LOG_KEY_VALUE")
+	private String logKeyValue;
+	@Column(name = "UUID")
+	private String uuid;
+	@Column(name = "APP_ID")
+	private String appId;
+	@Column(name = "FUNCTION_ID")
+	private String functionId;
+	@Column(name = "FUNCTION_NAME")
+	private String functionName;
+	@Column(name = "MAPPING")
+	private String mapping;
 	@Column(name = "LAT")
 	private String lat;
 	@Column(name = "LNG")
@@ -45,4 +55,6 @@ public class LoginTermInfo {
 	@Version
 	@Column(name = "VERSION")
 	private Integer version;
+	@Column(name = "TOKEN_ID")
+	private String tokenId;
 }

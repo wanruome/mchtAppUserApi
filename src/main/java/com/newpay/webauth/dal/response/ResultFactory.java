@@ -34,8 +34,10 @@ public class ResultFactory {
 	public static String ERR_TOKEN_INVALID = "e411";
 	public static String ERR_MSGCODE_INVALID = "e412";
 	public static String ERR_CLIENT_TIME = "e413";
+	public static String ERR_LOCATION_CHANGE = "e416";
 	// public static String ERR_SIGN_INFO_REPEAT = "e414";
 	public static String ERR_REPAYMENT = "e420";
+
 	public static String ERR_UNKNOWN = "e499";
 	// public static String ERROR_TOKEN_MISS = "e001";
 	// public static String ERROR_TOKEN_INVALID = "e000";

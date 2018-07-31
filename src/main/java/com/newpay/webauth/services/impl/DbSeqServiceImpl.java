@@ -130,4 +130,9 @@ public class DbSeqServiceImpl implements DbSeqService {
 		return getSeqByName("SEQ_LOGIN_TERM_INFO_NEW_PK", null, 100000);
 	}
 
+	@Override
+	public String getTermInfoLogNewPk() {
+		return getSeqByName("SEQ_TERM_INFO_LOG_NEW_PK", null, 100000);
+	}
+
 }
